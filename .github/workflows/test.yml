@@ -1,0 +1,26 @@
+name: Screenshot tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+      - run: python split_screenshot.py "2026-10-06 11.08.30.jpg" --output-dir output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sample-pngs-python-${{ matrix.python }}
+          path: output/*.png
+          if-no-files-found: error
