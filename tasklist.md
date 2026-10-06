@@ -8,6 +8,7 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- 已取回远端初始截图，确认布局一致；继续检查发现原图携带 Display P3 色彩配置，已统一转为 sRGB，保持严格像素检查。
 - issue #5 已创建 PR #6：https://github.com/f1515x/SFExpressReturnPicture/pull/6 。
 - 第一轮远端 Python 3.10、3.13 和旧网页检查通过；新页发现 JPEG 解码差异，已改用无损 PNG 底图，继续严格检查。
 - 本次已确认 issue #1 关闭、PR #2 合并；已同步最新 main，并创建 feature/issue-3-offline-address 分支。
