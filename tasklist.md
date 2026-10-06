@@ -8,23 +8,27 @@
 
 ## 做完：
 - 本次已确认 issue #1 关闭、PR #2 合并；已同步最新 main，并创建 feature/issue-3-offline-address 分支。
-- 已阅读 issue #3（没有补充正文或评论），已查看 02_address.png，正在确认文字是否需要可编辑。
+- 已阅读 issue #3（没有补充正文或评论），已查看 02_address.png，并向用户确认文字需要可编辑。
 - 用户已确认文字需要能选中和修改；已实现离线 HTML 编辑、保存网页、导出配置，以及带真实文字的 SVG。
 - 已加入完整本地中文字体和原始许可，生成文件内嵌字体，无需联网。原字体未知，字形可能略有差别。
 - 已补充使用说明、错误输入和避免覆盖检查，以及远端浏览器编辑、保存重开和原图对照验证。
+- 已提交 PR #4：https://github.com/f1515x/SFExpressReturnPicture/pull/4 ，尚未合并，留给用户审阅。
+- issue #3 的 Python 3.10、3.13 测试和断网浏览器测试全部通过：https://github.com/f1515x/SFExpressReturnPicture/actions/runs/37487673769 。
+- 已取回远端生成的 HTML、SVG 和对照图，放到本地 offline-address 目录；已查看网页和 SVG 截图，尺寸和排版对齐，字形有差别。整图平均绝对误差为 9.282/255。
+- 已按要求关闭 issue #3；代码在 feature/issue-3-offline-address 分支，说明和任务记录已补齐。
 - 已确认本地仓库对应 f1515x/SFExpressReturnPicture，目前在 main 分支，工作区没有未提交改动。
 - 已阅读 issue #1 和评论，随后同步了远端新上传的示例截图。
 - 用户已确认：输入是保存好的长截图，输出为灰色区上方、灰色区本身、灰色区下方三张 PNG。
 - 已写好自动识别和手动指定边界的 Python 脚本，以及使用说明。
 - 已添加远端测试流程，检查示例位置、无损拼回、错误输入和避免覆盖，并保存示例输出。
-- 已提交 PR #2：https://github.com/f1515x/SFExpressReturnPicture/pull/2 ，等待审阅，尚未合并。
+- 已提交 PR #2：https://github.com/f1515x/SFExpressReturnPicture/pull/2 ，现已合并。
 - Python 3.10 和 3.13 的远端测试全部通过：https://github.com/f1515x/SFExpressReturnPicture/actions/runs/37485424931 。
 - 已取回远端生成的三张 PNG，保存到本地 output 目录，并逐张查看，地址灰色区完整保留。
 - 已按 issue 要求关闭 issue #1；使用说明和本任务记录均已更新。
 
 ## 没做：
-- issue #3 的实现、远端验证和 PR 尚未完成。
+- PR #4 尚未合并，留给用户审阅。
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- 处理 issue #3：正在做静态检查，准备提交 PR，并运行远端 CI 查看网页对齐效果。
+- issue #3 的实现、远端验证和交付已完成，没有正在执行的事项。
