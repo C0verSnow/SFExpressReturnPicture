@@ -3,6 +3,7 @@ import argparse
 import base64
 import html
 import json
+import io
 import shutil
 from pathlib import Path
 
@@ -28,7 +29,9 @@ def export_page(config, output_dir):
     with Image.open(source) as image:
         if image.size != (1182, 2560):
             raise ValueError('此模板只适用于仓库中的 1182 × 2560 样例截图。')
-    photo = base64.b64encode(source.read_bytes()).decode('ascii')
+        decoded = io.BytesIO()
+        image.convert('RGB').save(decoded, format='PNG')
+    photo = base64.b64encode(decoded.getvalue()).decode('ascii')
     font = base64.b64encode((ROOT / 'assets/fonts/NotoSansCJKsc-Regular.otf').read_bytes()).decode('ascii')
     # Escape JSON for an HTML script element, including malicious closing tags.
     state = json.dumps(data, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')

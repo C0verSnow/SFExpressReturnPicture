@@ -8,6 +8,8 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- issue #5 已创建 PR #6：https://github.com/f1515x/SFExpressReturnPicture/pull/6 。
+- 第一轮远端 Python 3.10、3.13 和旧网页检查通过；新页发现 JPEG 解码差异，已改用无损 PNG 底图，继续严格检查。
 - 本次已确认 issue #1 关闭、PR #2 合并；已同步最新 main，并创建 feature/issue-3-offline-address 分支。
 - 已阅读 issue #3（没有补充正文或评论），已查看 02_address.png，并向用户确认文字需要可编辑。
 - 用户已确认文字需要能选中和修改；已实现离线 HTML 编辑、保存网页、导出配置，以及带真实文字的 SVG。

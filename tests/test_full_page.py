@@ -13,7 +13,7 @@ class FullPageTests(unittest.TestCase):
             output = Path(directory) / 'page'
             page = export_page(ROOT / 'address.json', output)
             original = page.read_bytes()
-            self.assertIn(b'data:image/jpeg;base64,', original)
+            self.assertIn(b'data:image/png;base64,', original)
             self.assertIn(b'data:font/otf;base64,', original)
             for name in ('full-page.js', 'address-dialog.svg', 'NotoSansCJKsc-Regular.otf', 'OFL.txt'):
                 self.assertTrue((output / name).is_file())
