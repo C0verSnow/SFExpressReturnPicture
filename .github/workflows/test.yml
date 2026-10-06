@@ -41,3 +41,20 @@ jobs:
           name: offline-address-preview
           path: offline-address/
           if-no-files-found: error
+  full-page-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r requirements.txt playwright==1.55.0
+      - run: playwright install --with-deps chromium
+      - run: python full_page_to_html.py --output-dir offline-return-page
+      - run: python tests/browser_full_page.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-page-preview
+          path: offline-return-page/
+          if-no-files-found: error
