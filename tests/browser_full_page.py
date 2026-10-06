@@ -22,7 +22,9 @@ with sync_playwright() as p:
     assert panel.bounding_box() == {'x': 0, 'y': 0, 'width': 1182, 'height': 2560}
     panel.screenshot(path=str(OUT / 'initial.png'))
     with Image.open(ROOT / '2026-10-06 11.08.30.jpg') as source, Image.open(OUT / 'initial.png') as rendered:
-        assert ImageChops.difference(source.convert('RGB'), rendered.convert('RGB')).getbbox() is None
+        delta = ImageChops.difference(source.convert('RGB'), rendered.convert('RGB'))
+        delta.save(OUT / 'initial-difference.png')
+        assert delta.getbbox() is None, (delta.getbbox(), delta.getextrema(), rendered.size)
     page.locator('#edit-address').click()
     assert page.locator('#editor').is_visible()
     page.screenshot(path=str(OUT / 'dialog.png'))
