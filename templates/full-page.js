@@ -14,6 +14,8 @@
   let busy = false;
   function font(ctx) {
     ctx.font = '48px Address';
+    ctx.fontKerning = 'none';
+    ctx.textRendering = 'geometricPrecision';
     ctx.letterSpacing = '-0.5px';
     ctx.textBaseline = 'alphabetic';
   }
@@ -36,7 +38,10 @@
       ctx.fillRect(...field.box);
       ctx.fillStyle = field.color;
       const values = key === 'lines' ? data.lines : [data[key]];
-      values.forEach((value, i) => ctx.fillText(value, field.x, field.y + i * 76));
+      values.forEach((value, i) => {
+        ctx.measureText(value);
+        ctx.fillText(value, field.x, field.y + i * 76);
+      });
     }
     return canvas;
   }

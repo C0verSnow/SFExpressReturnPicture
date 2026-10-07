@@ -123,7 +123,9 @@ with sync_playwright() as p:
     page.wait_for_function("!document.getElementById('rendered-photo').hidden")
     panel.screenshot(path=str(OUT / 'reopened.png'))
     with Image.open(OUT / 'confirmed-photo.png') as downloaded, Image.open(OUT / 'reopened.png') as reopened:
-        assert ImageChops.difference(downloaded.convert('RGB'), reopened.convert('RGB')).getbbox() is None
+        delta = ImageChops.difference(downloaded.convert('RGB'), reopened.convert('RGB'))
+        delta.save(OUT / 'reopened-difference.png')
+        assert delta.getbbox() is None, (delta.getbbox(), delta.getextrema())
     with page.expect_download() as pending:
         page.locator('#save-photo').click()
     pending.value.save_as(OUT / 'saved-again.png')
