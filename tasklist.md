@@ -10,6 +10,10 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- 最终 pages 目录的五项远端检查全部通过，逐文件对比确认提交的文件与重新生成结果完全一致：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37575724736 。
+- 已更新 C0verSnow 仓库 PR #2 并按 issue 正文要求关闭 issue #1；PR 不自动合并，留给用户审阅。
+- pages/ 已完整交付，Cloudflare 使用 None、exit 0、输出目录 pages；真实域名首次部署需要用户在 Cloudflare 后台连接仓库。
+- 本次没有进行任何本地构建、编译、生成验证或测试；最后仅补充任务记录，不修改已通过检查的代码和发布文件。
 - 第一轮远端五项检查全部通过：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37575473475 。
 - 已取回远端 cloudflare-pages-site 附件到 pages/；包含 index.html、JS、SVG、字体、许可、配置、404 和重定向。首页约 23.1 MB，低于单文件 25 MiB 限制。
 - 已取回实际修改后的照片和网页预览；远端确认两者像素一致，保存网页后断网重开还能下载同一张照片。
@@ -59,8 +63,9 @@
 - 已按 issue 要求关闭 issue #1；使用说明和本任务记录均已更新。
 
 ## 没做：
+- C0verSnow 仓库 PR #2 未合并；未连接 Cloudflare 账号或部署真实 pages.dev 域名。
 - PR #8 尚未合并，留给用户审阅；PR #4 和 PR #6 已合并到 main。
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- 正在提交远端生成的 pages 目录，并检查提交文件与远端再次生成结果完全一致。
+- 没有正在执行的事项，C0verSnow 仓库的 Cloudflare 部署 issue #1 已完成。
