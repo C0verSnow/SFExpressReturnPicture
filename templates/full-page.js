@@ -15,7 +15,6 @@
   function font(ctx) {
     ctx.font = '48px Address';
     ctx.fontKerning = 'none';
-    ctx.textRendering = 'geometricPrecision';
     ctx.letterSpacing = '-0.5px';
     ctx.textBaseline = 'alphabetic';
   }
@@ -28,7 +27,8 @@
     await get('source').decode();
     const canvas = document.createElement('canvas');
     canvas.width = 1182; canvas.height = 2560;
-    const ctx = canvas.getContext('2d');
+    // PNG encoding reads back pixels; use the same software surface on reopen.
+    const ctx = canvas.getContext('2d', {alpha: false, willReadFrequently: true});
     ctx.drawImage(get('source'), 0, 0);
     font(ctx);
     for (const [key, field] of Object.entries(fields)) {
@@ -38,10 +38,7 @@
       ctx.fillRect(...field.box);
       ctx.fillStyle = field.color;
       const values = key === 'lines' ? data.lines : [data[key]];
-      values.forEach((value, i) => {
-        ctx.measureText(value);
-        ctx.fillText(value, field.x, field.y + i * 76);
-      });
+      values.forEach((value, i) => ctx.fillText(value, field.x, field.y + i * 76));
     }
     return canvas;
   }
