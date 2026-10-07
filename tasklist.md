@@ -11,6 +11,10 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- issue #3 最终三项远端检查全部通过，已确认 pages/ 与远端重新生成的所有文件完全一致：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37598930506 。
+- 已取回并查看 Desktop、Laptop、Tablet、Mobile 和弹窗预览；默认文字、修改按钮及唯一照片保存按钮位置正常，下载照片维持原始分辨率。
+- PR #4 已从草稿改为可审阅，完整 pages/、说明和执行记录已提交；PR 留给用户审阅，合并后自动关闭 issue #3：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。
+- 最后一笔提交仅更新任务记录；本次没有运行本地生成、测试、构建或编译。
 - issue #3 第二轮远端三项检查全部通过（Python 3.10、3.13、在线与离线浏览器）：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37598656287 。
 - 已取回远端 cloudflare-pages-site 附件到 pages/，不在本地生成。正在取回四类屏幕预览并检查最终发布目录一致性。
 - 已创建草稿 PR #4：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。第一轮远端 Python 3.10、3.13 单元检查通过，浏览器检查正在执行。
@@ -69,10 +73,9 @@
 - 已按 issue 要求关闭 issue #1；使用说明和本任务记录均已更新。
 
 ## 没做：
-- C0verSnow 仓库 PR #2 未合并；未连接 Cloudflare 账号或部署真实 pages.dev 域名。
+- 本次 PR #4 尚未合并，issue #3 等合并后自动关闭；未连接 Cloudflare 账号或部署真实 pages.dev 域名。历史 PR #2 已合并。
 - PR #8 尚未合并，留给用户审阅；PR #4 和 PR #6 已合并到 main。
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- 已阅读 issue #3 和评论，已从最新 main 创建 feature/issue-3-simple-responsive；正在修改页面和统一脚本入口。
-- “统一工作流”暂按统一入口协调处理；正在远端验证并取回最终部署文件。
+- 没有正在执行的事项；issue #3 的代码、发布文件和远端检查已完成。
