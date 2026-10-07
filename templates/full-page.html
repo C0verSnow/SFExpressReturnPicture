@@ -3,32 +3,38 @@
 <title>退货退款详情 · 收件信息编辑</title>
 <style>
 @font-face{font-family:Address;src:url(data:font/otf;base64,@@FONT@@) format('opentype')}
-*{box-sizing:border-box}body{margin:0;background:#fff;font-family:Address,sans-serif}
-#page{position:relative;width:1182px;height:2560px;margin:0;overflow:hidden}
-#source{display:block;width:1182px;height:2560px}
-#edit-address{position:absolute;z-index:1;left:82px;top:1636px;width:1018px;height:469px;border:0;background:transparent;cursor:pointer}
-#edit-address:focus-visible{outline:3px solid #3589d6;outline-offset:-4px}
-#rendered-photo{position:absolute;inset:0;width:1182px;height:2560px;pointer-events:none}
-#rendered-photo[hidden]{display:none}
-#tools{padding:20px;font:16px/1.7 sans-serif;max-width:1182px}#tools button{padding:10px 16px;margin-right:12px}
-dialog{max-height:calc(100% - 32px);overflow:auto;border:0;border-radius:18px;width:min(560px,calc(100% - 32px));padding:28px;box-shadow:0 12px 60px #0003;font:16px/1.6 sans-serif}
-dialog::backdrop{background:#0006}h1{margin:0 0 8px;font-size:24px}label{display:block;margin-top:16px}input{display:block;width:100%;padding:10px 12px;margin-top:6px;font:16px sans-serif;border:1px solid #bbb;border-radius:8px}textarea{display:block;width:100%;min-height:110px;padding:12px;margin-top:8px;font:16px/1.8 sans-serif;border:1px solid #bbb;border-radius:8px;resize:vertical}
-.actions{display:flex;justify-content:flex-end;gap:12px;margin-top:24px}.actions button{border:1px solid #ddd;border-radius:8px;padding:10px 22px;font:16px sans-serif;cursor:pointer}#confirm{background:#e72d20;color:white;border:0}#error{color:#bc241a;min-height:24px}#hint{color:#666;margin:0}details{padding:20px}
-@media print{#tools,#license,dialog{display:none}}
+:root{color-scheme:light;--preview-width:420px;--accent:#e94335}
+*{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#252832;font-family:system-ui,-apple-system,sans-serif}
+#workspace{width:min(100%,var(--preview-width));margin:auto;padding:20px 12px 0}
+#page{position:relative;width:100%;aspect-ratio:1182/2560;overflow:hidden;border-radius:18px;box-shadow:0 8px 32px #20293812;background:white}
+#source,#rendered-photo{display:block;width:100%;height:100%}#rendered-photo{position:absolute;inset:0;pointer-events:none}#rendered-photo[hidden]{display:none}
+#edit-address{position:absolute;z-index:1;left:6.9374%;top:63.90625%;width:86.1252%;height:18.320313%;border:0;border-radius:12px;background:transparent;cursor:pointer}
+#edit-address span{position:absolute;right:3%;top:3%;display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:20px;background:#fff;color:#b93228;font:600 12px system-ui;box-shadow:0 2px 8px #0001}
+#edit-address:hover{background:#e9433508}#edit-address:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+#edit-address:disabled,#save-photo:disabled{cursor:wait;opacity:.6}svg{width:20px;height:20px;flex-shrink:0}
+#tools{position:sticky;bottom:0;z-index:2;background:#f4f5f7ee;backdrop-filter:blur(12px);padding:16px 0 max(16px,env(safe-area-inset-bottom));text-align:center}
+#tools p{margin:0 0 12px;color:#666b77;font-size:13px;line-height:1.7}
+#save-photo{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border:0;border-radius:15px;background:var(--accent);color:white;font:600 16px system-ui;box-shadow:0 6px 16px #e9433526;cursor:pointer;transition:background .15s,transform .15s}
+#save-photo:hover{background:#d73529}#save-photo:active{transform:translateY(1px)}button:focus-visible{outline:3px solid #247cbb;outline-offset:3px}
+#status{display:block;margin-top:8px;font-size:12px;line-height:1.6;color:#59616e}#status:empty{display:none}
+dialog{max-height:calc(100dvh - 32px);overflow:auto;border:0;border-radius:20px;width:min(520px,calc(100% - 32px));padding:26px;box-shadow:0 12px 60px #0003;font:16px/1.6 system-ui}
+dialog::backdrop{background:#18202b66}h1{margin:0 0 8px;font-size:22px}label{display:block;margin-top:16px;font-weight:600}input,textarea{display:block;width:100%;padding:12px;margin-top:6px;font:16px/1.7 system-ui;border:1px solid #d9dce2;border-radius:10px;background:#fafbfc}textarea{min-height:132px;resize:vertical}
+.actions{display:flex;gap:12px;margin-top:20px}.actions button{flex:1;border:1px solid #ddd;border-radius:12px;min-height:48px;padding:10px;font:600 16px system-ui;cursor:pointer}#confirm{background:var(--accent);color:white;border:0}#error{color:#bc241a;min-height:24px}#hint{color:#666b77;margin:0;font-size:14px}
+html[data-platform="laptop"]{--preview-width:380px}html[data-platform="tablet"]{--preview-width:480px}html[data-platform="mobile"]{--preview-width:100%}
+@media(max-width:599px){#workspace{padding:10px 10px 0}#page{border-radius:14px}dialog{padding:20px}#tools{padding-top:12px}}
+@media print{#tools,#edit-address,dialog{display:none}#workspace{width:100%;padding:0}#page{box-shadow:none;border-radius:0}}
 </style></head><body>
-<main id="page" aria-label="退货退款详情截图">
-<img id="source" src="data:image/png;base64,@@PHOTO@@" alt="退货退款详情，点击商家地址区可以更改名字、电话和地址" width="1182" height="2560">
-<button id="edit-address" type="button" aria-label="修改名字、电话和地址" aria-haspopup="dialog"></button>
-<img id="persisted-photo" hidden alt="">
+<div id="workspace"><main id="page" aria-label="退货退款详情截图">
+<img id="source" src="data:image/png;base64,@@PHOTO@@" alt="退货退款详情，点击修改信息按钮更改名字、电话和地址" width="1182" height="2560">
+<button id="edit-address" type="button" aria-label="修改名字、电话和地址" aria-haspopup="dialog" disabled><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m15 5 4 4M4 20l4-1L20 7a3 3 0 0 0-4-4L4 15v5Z"/></svg>修改信息</span></button>
 <canvas id="rendered-photo" width="1182" height="2560" hidden role="img" aria-label="修改后的退货截图"></canvas>
 </main>
-<aside id="tools">点击灰色地址区修改名字、电话和地址，确认后自动下载整张 PNG 照片。<br>
-<button id="save-photo" type="button">保存修改后的照片</button><button id="save" type="button">保存修改后的网页</button><button id="save-json" type="button">导出地址配置</button><span id="status" role="status"></span></aside>
+<aside id="tools"><p>点击按钮即可修改信息，注意地址要写满三行</p>
+<button id="save-photo" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg>保存修改后的照片</button><span id="status" role="status"></span></aside></div>
 <dialog id="editor" aria-labelledby="dialog-title" aria-describedby="hint">
-<form id="address-form"><h1 id="dialog-title">修改名字、电话和地址</h1><p id="hint">保持原图字号、颜色和位置。地址最多三行，文字过长请缩短或换行。</p>
+<form id="address-form"><h1 id="dialog-title">修改收件信息</h1><p id="hint">地址请写满三行，每行都要填写。照片保持原始尺寸。</p>
 <label for="merchant-input">名字</label><input id="merchant-input" type="text" required aria-describedby="error" autocomplete="off">
 <label for="phone-input">电话</label><input id="phone-input" type="tel" required aria-describedby="error" autocomplete="off">
-<label for="address-input">新地址</label><textarea id="address-input" required aria-describedby="error"></textarea>
+<label for="address-input">地址（共三行）</label><textarea id="address-input" required aria-describedby="error"></textarea>
 <div id="error" role="alert"></div><div class="actions"><button id="cancel" type="button">取消</button><button id="confirm" type="submit">确认修改</button></div></form></dialog>
-<details id="license"><summary>字体许可</summary><pre>@@LICENSE@@</pre></details>
 <script id="address-state" type="application/json">@@STATE@@</script><script>@@SCRIPT@@</script></body></html>

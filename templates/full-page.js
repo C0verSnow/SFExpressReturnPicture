@@ -1,5 +1,19 @@
 (() => {
   const get = id => document.getElementById(id);
+  // Device hints distinguish touch tablets from laptops; width handles resizing.
+  function fitPlatform() {
+    const width = window.innerWidth;
+    const mobileDevice = navigator.userAgentData?.mobile ?? /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const touchDevice = navigator.maxTouchPoints > 1 && matchMedia('(pointer: coarse)').matches;
+    const platform = width < 600 ? 'mobile'
+      : ((mobileDevice || touchDevice) && width < 1400) || width < 1024 ? 'tablet'
+      : width < 1600 ? 'laptop' : 'desktop';
+    const sizes = {desktop: '1920x1080', laptop: '1440x900', tablet: '768x1024', mobile: '390x844'};
+    document.documentElement.dataset.platform = platform;
+    document.documentElement.dataset.designCanvas = sizes[platform];
+  }
+  fitPlatform();
+  window.addEventListener('resize', fitPlatform);
   const state = JSON.parse(get('address-state').textContent);
   const original = {merchant: '多联科技', phone: '18925023056', lines: [
     '广东省广州市增城区 永宁街道和兴路鑫耀汽',
@@ -87,8 +101,8 @@
       if (!data.merchant || !data.phone || /[\r\n]/.test(data.merchant + data.phone)) {
         get('error').textContent = '请填写单行名字和电话。'; return;
       }
-      if (!data.lines.some(Boolean) || data.lines.length > 3) {
-        get('error').textContent = '请填写新地址，最多三行。'; return;
+      if (data.lines.length !== 3 || data.lines.some(line => !line)) {
+        get('error').textContent = '地址请写满三行，每行都要填写。'; return;
       }
       const ctx = document.createElement('canvas').getContext('2d');
       font(ctx);
@@ -98,7 +112,7 @@
         if (JSON.stringify(values) === JSON.stringify(key === 'lines' ? original.lines : [original[key]])) continue;
         if (values.some(value => ctx.measureText(value).width > field.width)) {
           get('error').textContent = key === 'lines'
-            ? '有一行地址太长，请换行，最多三行。'
+            ? '有一行地址太长，请缩短，并保持三行。'
             : `${key === 'merchant' ? '名字' : '电话'}太长，请缩短，保持原图字号和位置。`;
           return;
         }
@@ -127,49 +141,14 @@
       get('status').textContent = '照片未能保存，请重试。';
     }
   };
-  get('save').onclick = async () => {
-    if (!currentPNG) {
-      get('status').textContent = '照片尚未加载，请稍后再保存网页。';
-      return;
-    }
-    const snapshot = document.documentElement.cloneNode(true);
-    // Persist exact rendered pixels alongside editable state, avoiding re-rasterization.
-    try {
-      snapshot.querySelector('#persisted-photo').src = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(currentPNG);
-      });
-    } catch (error) {
-      get('status').textContent = '网页未能保存，请重试。';
-      return;
-    }
-    snapshot.querySelector('#editor').removeAttribute('open');
-    snapshot.querySelector('#status').textContent = '';
-    snapshot.querySelector('#error').textContent = '';
-    snapshot.querySelector('#confirm').removeAttribute('disabled');
-    snapshot.querySelector('#rendered-photo').setAttribute('hidden', '');
-    snapshot.querySelector('#address-input').textContent = '';
-    download('return-page-edited.html', new Blob(['<!doctype html>\n' + snapshot.outerHTML], {type: 'text/html;charset=utf-8'}));
-  };
-  get('save-json').onclick = () => download('address.json', new Blob([JSON.stringify(state, null, 2) + '\n'], {type: 'application/json;charset=utf-8'}));
   get('edit-address').disabled = true;
   async function initialize() {
     let canvas, blob;
-    const persisted = get('persisted-photo');
-    if (persisted.hasAttribute('src')) {
-      await persisted.decode();
-      canvas = document.createElement('canvas');
-      canvas.width = 1182; canvas.height = 2560;
-      canvas.getContext('2d').drawImage(persisted, 0, 0);
-      blob = await (await fetch(persisted.src)).blob();
-    } else {
-      canvas = await photo(state);
-      blob = await png(canvas);
-    }
+    canvas = await photo(state);
+    blob = await png(canvas);
     render(canvas, blob);
     get('edit-address').disabled = false;
+    get('save-photo').disabled = false;
   }
   initialize().catch(() => {
     get('status').textContent = '图片或字体未能加载，请重新打开网页。';

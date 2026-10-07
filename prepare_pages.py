@@ -6,9 +6,9 @@ from address_to_html import ROOT
 from full_page_to_html import export_page
 
 
-def prepare_pages(output_dir):
+def prepare_pages(output_dir, config=ROOT / 'address.json'):
     target = Path(output_dir)
-    page = export_page(ROOT / 'address.json', target)
+    page = export_page(config, target)
     page.rename(target / 'index.html')
     # Explicit 404 disables Pages' implicit SPA fallback for unknown paths.
     (target / '404.html').write_text(

@@ -10,7 +10,7 @@ from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE = ROOT / 'pages' if (ROOT / 'pages/index.html').exists() else ROOT / 'pages-site'
+SITE = ROOT / 'pages-site'
 OUT = ROOT / 'pages-check'
 OUT.mkdir()
 server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(SimpleHTTPRequestHandler, directory=str(SITE)))
@@ -37,34 +37,26 @@ try:
         page.locator('#edit-address').click()
         page.locator('#merchant-input').fill('新商家')
         page.locator('#phone-input').fill('13800138000')
-        page.locator('#address-input').fill('上海市浦东新区\n新地址 100 号')
+        page.locator('#address-input').fill('上海市\n浦东新区\n新地址 100 号')
         with page.expect_download() as pending:
             page.locator('#confirm').click()
         pending.value.save_as(OUT / 'edited.png')
         assert pending.value.suggested_filename == 'return-page-edited.png'
         page.wait_for_function("!document.getElementById('editor').open")
-        page.locator('#page').screenshot(path=str(OUT / 'preview.png'))
+        # Compare downloaded full resolution with the displayed canvas pixels.
+        import base64
+        data = page.locator('#rendered-photo').evaluate("canvas => canvas.toDataURL().split(',')[1]")
+        (OUT / 'preview.png').write_bytes(base64.b64decode(data))
         with Image.open(OUT / 'edited.png') as photo, Image.open(OUT / 'preview.png') as preview:
             assert photo.size == (1182, 2560)
             assert ImageChops.difference(photo.convert('RGB'), preview.convert('RGB')).getbbox() is None
-        with page.expect_download() as pending:
-            page.locator('#save-json').click()
-        pending.value.save_as(OUT / 'address.json')
-        assert json.loads((OUT / 'address.json').read_text()) == {
-            'merchant': '新商家', 'phone': '13800138000', 'lines': ['上海市浦东新区', '新地址 100 号', '']}
-        with page.expect_download() as pending:
-            page.locator('#save').click()
-        pending.value.save_as(OUT / 'edited.html')
-        # A saved page must still work away from the deployed site.
+        assert page.locator('#tools button').count() == 1
+        assert page.locator('#license, #save, #save-json').count() == 0
         page.context.set_offline(True)
-        page.goto((OUT / 'edited.html').as_uri())
-        page.wait_for_function("!document.getElementById('edit-address').disabled")
         with page.expect_download() as pending:
             page.locator('#save-photo').click()
-        pending.value.save_as(OUT / 'reopened.png')
-        assert (OUT / 'reopened.png').read_bytes() == (OUT / 'edited.png').read_bytes()
-        page.locator('#edit-address').click()
-        assert page.locator('#merchant-input').input_value() == '新商家'
+        pending.value.save_as(OUT / 'offline.png')
+        assert (OUT / 'offline.png').read_bytes() == (OUT / 'edited.png').read_bytes()
         assert not errors, errors
         assert not external, external
         browser.close()
