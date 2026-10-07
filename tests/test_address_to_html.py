@@ -15,8 +15,8 @@ class AddressExportTests(unittest.TestCase):
             root = ET.fromstring(svg.read_text(encoding="utf-8"))
             self.assertEqual((root.attrib["width"], root.attrib["height"]), ("1182", "469"))
             texts = [node.text for node in root.findall("{http://www.w3.org/2000/svg}text")]
-            self.assertIn("多联科技", texts)
-            self.assertIn("18925023056", texts)
+            self.assertIn("张三", texts)
+            self.assertIn("18888888888", texts)
             source = page.read_text(encoding="utf-8")
             self.assertIn("data:font/otf;base64,", source)
             self.assertNotIn('<img', source)

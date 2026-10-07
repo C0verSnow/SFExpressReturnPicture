@@ -1,6 +1,7 @@
 # 本文档为4象限的任务清单，全文书写大白话
 
 ## 想做：
+- 完成 C0verSnow issue #3：简化脚本和远端流程、重做网页操作区、更新默认收件信息、适配四类屏幕，提交 PR 并完成远端检查。
 - 完成 C0verSnow 仓库 issue #1：整理 Cloudflare Pages 目录，根网址直接打开整张截图编辑页，提交 PR、跑远端检查并关闭 issue。
 - 完成 issue #7：名字、电话和地址都能修改，确认后自动下载整张 PNG 照片，更新文档、提交 PR、跑远端测试并关闭 issue。
 - 完成 issue #5：整张截图离线展示，点击地址弹窗修改，只改地址，提供脚本和网页资源，提交 PR、跑远端测试并关闭 issue。
@@ -10,6 +11,15 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- issue #3 最终三项远端检查全部通过，已确认 pages/ 与远端重新生成的所有文件完全一致：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37598930506 。
+- 已取回并查看 Desktop、Laptop、Tablet、Mobile 和弹窗预览；默认文字、修改按钮及唯一照片保存按钮位置正常，下载照片维持原始分辨率。
+- PR #4 已从草稿改为可审阅，完整 pages/、说明和执行记录已提交；PR 留给用户审阅，合并后自动关闭 issue #3：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。
+- 最后一笔提交仅更新任务记录；本次没有运行本地生成、测试、构建或编译。
+- issue #3 第二轮远端三项检查全部通过（Python 3.10、3.13、在线与离线浏览器）：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37598656287 。
+- 已取回远端 cloudflare-pages-site 附件到 pages/，不在本地生成。正在取回四类屏幕预览并检查最终发布目录一致性。
+- 已创建草稿 PR #4：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。第一轮远端 Python 3.10、3.13 单元检查通过，浏览器检查正在执行。
+- issue #3 已更新默认信息、单一保存按钮、三行地址要求和四类屏幕布局；已加入统一入口 workflow.py，远端浏览器流程合并成一项。
+- 已更新说明和远端检查，正在等待远端结果；本地只做代码阅读、语法静态解析及差异检查，不运行生成、测试或编译。
 - 最终 pages 目录的五项远端检查全部通过，逐文件对比确认提交的文件与重新生成结果完全一致：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37575724736 。
 - 已更新 C0verSnow 仓库 PR #2 并按 issue 正文要求关闭 issue #1；PR 不自动合并，留给用户审阅。
 - pages/ 已完整交付，Cloudflare 使用 None、exit 0、输出目录 pages；真实域名首次部署需要用户在 Cloudflare 后台连接仓库。
@@ -63,9 +73,9 @@
 - 已按 issue 要求关闭 issue #1；使用说明和本任务记录均已更新。
 
 ## 没做：
-- C0verSnow 仓库 PR #2 未合并；未连接 Cloudflare 账号或部署真实 pages.dev 域名。
+- 本次 PR #4 尚未合并，issue #3 等合并后自动关闭；未连接 Cloudflare 账号或部署真实 pages.dev 域名。历史 PR #2 已合并。
 - PR #8 尚未合并，留给用户审阅；PR #4 和 PR #6 已合并到 main。
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- 没有正在执行的事项，C0verSnow 仓库的 Cloudflare 部署 issue #1 已完成。
+- 没有正在执行的事项；issue #3 的代码、发布文件和远端检查已完成。

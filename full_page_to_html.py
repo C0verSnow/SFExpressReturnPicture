@@ -1,7 +1,6 @@
 """Generate a self-contained screenshot page with a contact editor and PNG export."""
 import argparse
 import base64
-import html
 import json
 import io
 import shutil
@@ -20,12 +19,12 @@ def export_page(config, output_dir):
         if not isinstance(value, str) or not value.strip() or '\n' in value or '\r' in value:
             raise ValueError(f'{key} 必须是单行非空文字。')
     lines = data.get('lines')
-    if (not isinstance(lines, list) or not 1 <= len(lines) <= 3
-            or any(not isinstance(line, str) or '\n' in line or '\r' in line for line in lines)
+    if (not isinstance(lines, list) or len(lines) != 3
+            or any(not isinstance(line, str) or not line.strip() or '\n' in line or '\r' in line for line in lines)
             or not any(line.strip() for line in lines)):
-        raise ValueError('lines 必须是一至三行地址，不能全部为空。')
+        raise ValueError('lines 必须是三行非空地址。')
     data = {"merchant": data['merchant'].strip(), "phone": data['phone'].strip(),
-            "lines": lines + [''] * (3 - len(lines))}
+            "lines": [line.strip() for line in lines]}
     target = Path(output_dir)
     if target.exists():
         raise ValueError('输出目录已经存在，请换一个目录，避免覆盖。')
@@ -46,11 +45,10 @@ def export_page(config, output_dir):
     state = json.dumps(data, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
     template = (ROOT / 'templates/full-page.html').read_text(encoding='utf-8')
     replacements = {'PHOTO': photo, 'FONT': font, 'STATE': state,
-                    'SCRIPT': (ROOT / 'templates/full-page.js').read_text(encoding='utf-8'),
-                    'LICENSE': html.escape((ROOT / 'assets/fonts/OFL.txt').read_text(encoding='utf-8'))}
+                    'SCRIPT': (ROOT / 'templates/full-page.js').read_text(encoding='utf-8')}
     # A single pass prevents user data from being interpreted as placeholders.
     import re
-    page = re.sub(r'@@(PHOTO|FONT|STATE|SCRIPT|LICENSE)@@',
+    page = re.sub(r'@@(PHOTO|FONT|STATE|SCRIPT)@@',
                   lambda match: replacements[match.group(1)], template)
     target.mkdir(parents=True)
     (target / 'return-page.html').write_text(page, encoding='utf-8')

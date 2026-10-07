@@ -6,33 +6,6 @@ on:
 permissions:
   contents: read
 jobs:
-  cloudflare-pages:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - run: python -m pip install -r requirements.txt playwright==1.55.0
-      - run: playwright install --with-deps chromium
-      - run: python prepare_pages.py
-      - name: Check committed deployment files match remote generation
-        run: |
-          if [ -f pages/index.html ]; then
-            diff -qr pages pages-site
-          fi
-      - run: python tests/browser_pages.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cloudflare-pages-site
-          path: pages-site/
-          if-no-files-found: error
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cloudflare-pages-check
-          path: pages-check/
-          if-no-files-found: error
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -45,13 +18,13 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: python -m pip install -r requirements.txt
       - run: python -m unittest discover -s tests -v
-      - run: python split_screenshot.py "2026-10-06 11.08.30.jpg" --output-dir sample-output
+      - run: python workflow.py split --output-dir sample-output
       - uses: actions/upload-artifact@v4
         with:
           name: sample-pngs-python-${{ matrix.python }}
           path: sample-output/*.png
           if-no-files-found: error
-  offline-browser:
+  browser:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,29 +33,24 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install -r requirements.txt playwright==1.55.0
       - run: playwright install --with-deps chromium
-      - run: python split_screenshot.py "2026-10-06 11.08.30.jpg" --output-dir output
-      - run: python address_to_html.py --output-dir offline-address
-      - run: python tests/browser_address.py
+      - name: Generate once and verify HTTP, offline and responsive flows
+        run: python workflow.py verify
+      - name: Check committed deployment files match remote generation
+        run: |
+          if [ -f pages/index.html ]; then
+            diff -qr pages pages-site
+          fi
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: offline-address-preview
-          path: offline-address/
+          name: cloudflare-pages-site
+          path: pages-site/
           if-no-files-found: error
-  full-page-browser:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - run: python -m pip install -r requirements.txt playwright==1.55.0
-      - run: playwright install --with-deps chromium
-      - run: python full_page_to_html.py --output-dir offline-return-page
-      - run: python tests/browser_full_page.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: full-page-preview
-          path: offline-return-page/
+          name: browser-previews
+          path: |
+            pages-check/
+            offline-return-page/
+            offline-address/
           if-no-files-found: error
