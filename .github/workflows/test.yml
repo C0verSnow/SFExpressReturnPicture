@@ -6,6 +6,33 @@ on:
 permissions:
   contents: read
 jobs:
+  cloudflare-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r requirements.txt playwright==1.55.0
+      - run: playwright install --with-deps chromium
+      - run: python prepare_pages.py
+      - name: Check committed deployment files match remote generation
+        run: |
+          if [ -f pages/index.html ]; then
+            diff -qr pages pages-site
+          fi
+      - run: python tests/browser_pages.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-pages-site
+          path: pages-site/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloudflare-pages-check
+          path: pages-check/
+          if-no-files-found: error
   test:
     runs-on: ubuntu-latest
     strategy:
