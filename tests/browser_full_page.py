@@ -116,7 +116,8 @@ with sync_playwright() as p:
     confirm(page, OUT / 'escaped-photo.png')
     assert page.locator('#page img').count() == 1
     for key in ('merchant', 'phone'):
-        page.locator('#edit-address').click() if not page.locator('#editor').is_visible() else None
+        if not page.locator('#editor').is_visible():
+            page.locator('#edit-address').click()
         page.locator('#' + key + '-input').fill(ORIGINAL[key])
     page.locator('#address-input').fill('\n'.join(ORIGINAL['lines']))
     confirm(page, OUT / 'restored.png')
@@ -150,7 +151,7 @@ with sync_playwright() as p:
         assert (OUT / f'{platform}-photo.png').read_bytes() == (OUT / 'confirmed-photo.png').read_bytes()
         if platform == 'desktop':
             view.set_viewport_size({'width': 390, 'height': 844})
-            assert view.locator('html').get_attribute('data-platform') == 'mobile'
+            view.wait_for_function("document.documentElement.dataset.platform === 'mobile'")
             assert view.evaluate('document.documentElement.scrollWidth <= innerWidth')
         device.close()
     assert not errors, errors

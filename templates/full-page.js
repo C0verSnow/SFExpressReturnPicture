@@ -6,7 +6,7 @@
     const mobileDevice = navigator.userAgentData?.mobile ?? /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     const touchDevice = navigator.maxTouchPoints > 1 && matchMedia('(pointer: coarse)').matches;
     const platform = width < 600 ? 'mobile'
-      : ((mobileDevice || touchDevice) && width < 1400) || width < 1024 ? 'tablet'
+      : (((mobileDevice || touchDevice) && width < 1400) || width < 1024) ? 'tablet'
       : width < 1600 ? 'laptop' : 'desktop';
     const sizes = {desktop: '1920x1080', laptop: '1440x900', tablet: '768x1024', mobile: '390x844'};
     document.documentElement.dataset.platform = platform;
@@ -42,7 +42,7 @@
     await get('source').decode();
     const canvas = document.createElement('canvas');
     canvas.width = 1182; canvas.height = 2560;
-    // PNG encoding reads back pixels; use the same software surface on reopen.
+    // Use a consistent software surface for PNGs on every device.
     const ctx = canvas.getContext('2d', {alpha: false, willReadFrequently: true});
     ctx.drawImage(get('source'), 0, 0);
     font(ctx);
@@ -117,7 +117,6 @@
           return;
         }
       }
-      data.lines = [...data.lines, ...Array(3 - data.lines.length).fill('')];
       const canvas = await photo(data);
       const blob = await png(canvas);
       Object.assign(state, data);
@@ -143,9 +142,8 @@
   };
   get('edit-address').disabled = true;
   async function initialize() {
-    let canvas, blob;
-    canvas = await photo(state);
-    blob = await png(canvas);
+    const canvas = await photo(state);
+    const blob = await png(canvas);
     render(canvas, blob);
     get('edit-address').disabled = false;
     get('save-photo').disabled = false;

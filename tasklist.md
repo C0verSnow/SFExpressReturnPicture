@@ -11,6 +11,7 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- 已创建草稿 PR #4：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。第一轮远端 Python 3.10、3.13 单元检查通过，浏览器检查正在执行。
 - issue #3 已更新默认信息、单一保存按钮、三行地址要求和四类屏幕布局；已加入统一入口 workflow.py，远端浏览器流程合并成一项。
 - 已更新说明和远端检查，正在等待远端结果；本地只做代码阅读、语法静态解析及差异检查，不运行生成、测试或编译。
 - 最终 pages 目录的五项远端检查全部通过，逐文件对比确认提交的文件与重新生成结果完全一致：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37575724736 。
@@ -72,4 +73,4 @@
 
 ## 在做：
 - 已阅读 issue #3 和评论，已从最新 main 创建 feature/issue-3-simple-responsive；正在修改页面和统一脚本入口。
-- 已询问“统一工作流”是否指一条命令协调脚本；其他明确要求先继续处理。
+- “统一工作流”暂按统一入口协调处理；正在远端验证并取回最终部署文件。
