@@ -12,7 +12,7 @@
   };
   const dialog = get('editor');
   let busy = false;
-  let currentCanvas, currentPNG;
+  let currentPNG;
   function font(ctx) {
     ctx.font = '48px Address';
     ctx.fontKerning = 'none';
@@ -44,7 +44,6 @@
     return canvas;
   }
   function render(canvas, blob) {
-    currentCanvas = canvas;
     currentPNG = blob;
     get('rendered-photo').getContext('2d').drawImage(canvas, 0, 0);
     get('rendered-photo').hidden = !changed(state);
@@ -128,14 +127,24 @@
       get('status').textContent = '照片未能保存，请重试。';
     }
   };
-  get('save').onclick = () => {
-    if (!currentCanvas) {
+  get('save').onclick = async () => {
+    if (!currentPNG) {
       get('status').textContent = '照片尚未加载，请稍后再保存网页。';
       return;
     }
     const snapshot = document.documentElement.cloneNode(true);
     // Persist exact rendered pixels alongside editable state, avoiding re-rasterization.
-    snapshot.querySelector('#persisted-photo').src = currentCanvas.toDataURL('image/png');
+    try {
+      snapshot.querySelector('#persisted-photo').src = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(currentPNG);
+      });
+    } catch (error) {
+      get('status').textContent = '网页未能保存，请重试。';
+      return;
+    }
     snapshot.querySelector('#editor').removeAttribute('open');
     snapshot.querySelector('#status').textContent = '';
     snapshot.querySelector('#error').textContent = '';
