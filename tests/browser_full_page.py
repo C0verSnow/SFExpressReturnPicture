@@ -137,7 +137,7 @@ with sync_playwright() as p:
     # All data uses text/canvas, never HTML. Exported configuration is reusable.
     page.locator('#address-input').fill('</script><img src=x>')
     confirm(page, OUT / 'escaped-photo.png')
-    assert page.locator('#page img').count() == 1
+    assert page.locator('#page img:not(#persisted-photo)').count() == 1
     with page.expect_download() as pending:
         page.locator('#save-json').click()
     pending.value.save_as(OUT / 'escaped.json')
@@ -146,7 +146,7 @@ with sync_playwright() as p:
                     '--output-dir', str(regenerated)], check=True)
     page.goto((regenerated / 'return-page.html').as_uri())
     page.wait_for_function("!document.getElementById('rendered-photo').hidden")
-    assert page.locator('#page img').count() == 1
+    assert page.locator('#page img:not(#persisted-photo)').count() == 1
     page.locator('#edit-address').click()
     assert page.locator('#merchant-input').input_value() == '新商家'
     assert page.locator('#address-input').input_value() == '</script><img src=x>'

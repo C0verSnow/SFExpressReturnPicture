@@ -12,6 +12,7 @@
   };
   const dialog = get('editor');
   let busy = false;
+  let currentCanvas, currentPNG;
   function font(ctx) {
     ctx.font = '48px Address';
     ctx.fontKerning = 'none';
@@ -42,7 +43,9 @@
     }
     return canvas;
   }
-  function render(canvas) {
+  function render(canvas, blob) {
+    currentCanvas = canvas;
+    currentPNG = blob;
     get('rendered-photo').getContext('2d').drawImage(canvas, 0, 0);
     get('rendered-photo').hidden = !changed(state);
     get('rendered-photo').setAttribute('aria-label', `${state.merchant} ${state.phone} ${state.lines.join(' ')}`);
@@ -105,7 +108,7 @@
       const canvas = await photo(data);
       const blob = await png(canvas);
       Object.assign(state, data);
-      render(canvas);
+      render(canvas, blob);
       download('return-page-edited.png', blob);
       dialog.close();
       get('status').textContent = '已生成修改后的 PNG 照片并发起下载，请查看浏览器下载列表。';
@@ -118,14 +121,21 @@
   };
   get('save-photo').onclick = async () => {
     try {
-      download('return-page-edited.png', await png(await photo(state)));
+      if (!currentPNG) throw new Error('照片尚未加载');
+      download('return-page-edited.png', currentPNG);
       get('status').textContent = '已发起 PNG 照片下载，请查看浏览器下载列表。';
     } catch (error) {
       get('status').textContent = '照片未能保存，请重试。';
     }
   };
   get('save').onclick = () => {
+    if (!currentCanvas) {
+      get('status').textContent = '照片尚未加载，请稍后再保存网页。';
+      return;
+    }
     const snapshot = document.documentElement.cloneNode(true);
+    // Persist exact rendered pixels alongside editable state, avoiding re-rasterization.
+    snapshot.querySelector('#persisted-photo').src = currentCanvas.toDataURL('image/png');
     snapshot.querySelector('#editor').removeAttribute('open');
     snapshot.querySelector('#status').textContent = '';
     snapshot.querySelector('#error').textContent = '';
@@ -136,10 +146,23 @@
   };
   get('save-json').onclick = () => download('address.json', new Blob([JSON.stringify(state, null, 2) + '\n'], {type: 'application/json;charset=utf-8'}));
   get('edit-address').disabled = true;
-  photo(state).then(canvas => {
-    render(canvas);
+  async function initialize() {
+    let canvas, blob;
+    const persisted = get('persisted-photo');
+    if (persisted.hasAttribute('src')) {
+      await persisted.decode();
+      canvas = document.createElement('canvas');
+      canvas.width = 1182; canvas.height = 2560;
+      canvas.getContext('2d').drawImage(persisted, 0, 0);
+      blob = await (await fetch(persisted.src)).blob();
+    } else {
+      canvas = await photo(state);
+      blob = await png(canvas);
+    }
+    render(canvas, blob);
     get('edit-address').disabled = false;
-  }).catch(() => {
+  }
+  initialize().catch(() => {
     get('status').textContent = '图片或字体未能加载，请重新打开网页。';
   });
 })();
