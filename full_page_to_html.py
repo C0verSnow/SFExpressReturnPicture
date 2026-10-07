@@ -1,4 +1,4 @@
-"""Generate a self-contained screenshot page with an address-only dialog."""
+"""Generate a self-contained screenshot page with a contact editor and PNG export."""
 import argparse
 import base64
 import html
@@ -13,14 +13,18 @@ from address_to_html import ROOT
 
 def export_page(config, output_dir):
     data = json.loads(Path(config).read_text(encoding="utf-8"))
-    if not isinstance(data, dict) or data.get('merchant') != '多联科技' or data.get('phone') != '18925023056':
-        raise ValueError('此页面只修改地址，商家和电话必须保持原样。')
+    if not isinstance(data, dict):
+        raise ValueError('地址配置必须是 JSON 对象。')
+    for key in ('merchant', 'phone'):
+        value = data.get(key)
+        if not isinstance(value, str) or not value.strip() or '\n' in value or '\r' in value:
+            raise ValueError(f'{key} 必须是单行非空文字。')
     lines = data.get('lines')
     if (not isinstance(lines, list) or not 1 <= len(lines) <= 3
             or any(not isinstance(line, str) or '\n' in line or '\r' in line for line in lines)
             or not any(line.strip() for line in lines)):
         raise ValueError('lines 必须是一至三行地址，不能全部为空。')
-    data = {"merchant": data['merchant'], "phone": data['phone'],
+    data = {"merchant": data['merchant'].strip(), "phone": data['phone'].strip(),
             "lines": lines + [''] * (3 - len(lines))}
     target = Path(output_dir)
     if target.exists():
@@ -59,7 +63,7 @@ def export_page(config, output_dir):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='生成整张退货截图的离线地址弹窗网页。')
+    parser = argparse.ArgumentParser(description='生成可修改名字、电话和地址并保存照片的离线网页。')
     parser.add_argument('--config', type=Path, default=ROOT / 'address.json')
     parser.add_argument('--output-dir', type=Path, default=Path('offline-return-page'))
     args = parser.parse_args()
