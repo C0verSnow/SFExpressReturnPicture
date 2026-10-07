@@ -11,6 +11,8 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- issue #3 第二轮远端三项检查全部通过（Python 3.10、3.13、在线与离线浏览器）：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37598656287 。
+- 已取回远端 cloudflare-pages-site 附件到 pages/，不在本地生成。正在取回四类屏幕预览并检查最终发布目录一致性。
 - 已创建草稿 PR #4：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。第一轮远端 Python 3.10、3.13 单元检查通过，浏览器检查正在执行。
 - issue #3 已更新默认信息、单一保存按钮、三行地址要求和四类屏幕布局；已加入统一入口 workflow.py，远端浏览器流程合并成一项。
 - 已更新说明和远端检查，正在等待远端结果；本地只做代码阅读、语法静态解析及差异检查，不运行生成、测试或编译。

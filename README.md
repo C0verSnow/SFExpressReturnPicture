@@ -86,7 +86,7 @@ python workflow.py address    # 生成单独的地址区网页到 offline-addres
 python workflow.py verify     # 远端生成资源并检查在线、离线和四类屏幕
 ```
 
-支持 `--config 配置.json` 和 `--output-dir 新目录`；切图支持 `--image`、`--top` 和 `--bottom`。路径相对仓库根目录，已有生成目录会拒绝覆盖。`verify` 使用固定目录，供 GitHub Actions 使用。工作流只有 Python 3.10、3.13 单元检查和一次浏览器检查，浏览器依赖只安装一次。
+支持 `--config 配置.json` 和 `--output-dir 新目录`；切图支持 `--image`、`--top` 和 `--bottom`。请在仓库根目录使用这些命令，已有生成目录会拒绝覆盖。`verify` 使用固定目录，供 GitHub Actions 使用。工作流只有 Python 3.10、3.13 单元检查和一次浏览器检查，浏览器依赖只安装一次。
 
 默认收件信息是「张三」「18888888888」，地址按三行显示：
 
