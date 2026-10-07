@@ -10,6 +10,11 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- 第一轮远端五项检查全部通过：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37575473475 。
+- 已取回远端 cloudflare-pages-site 附件到 pages/；包含 index.html、JS、SVG、字体、许可、配置、404 和重定向。首页约 23.1 MB，低于单文件 25 MiB 限制。
+- 已取回实际修改后的照片和网页预览；远端确认两者像素一致，保存网页后断网重开还能下载同一张照片。
+- 已提交 C0verSnow 仓库 PR #2：https://github.com/C0verSnow/SFExpressReturnPicture/pull/2 。
+- 已补上远端网页生成、HTTP 首页与资源检查、修改下载和断网重开检查；README 已写明 Cloudflare 的部署设置。
 - 已同步 C0verSnow/SFExpressReturnPicture，阅读唯一未完成的 issue #1（Cloudflare 部署）；本文件下方历史 issue 编号属于原 f1515x 仓库。
 - 已创建 feature/issue-1-cloudflare-pages 分支；确认 Pages 需要 index.html，采用独立 pages 目录和无需构建的部署方式。
 - issue #7 的四项远端检查全部通过（Python 3.10、3.13、旧地址页、新整页）：https://github.com/f1515x/SFExpressReturnPicture/actions/runs/37571229761 。
@@ -58,4 +63,4 @@
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- 正在整理部署目录、部署说明和远端 HTTP 浏览器检查。
+- 正在提交远端生成的 pages 目录，并检查提交文件与远端再次生成结果完全一致。
