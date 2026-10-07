@@ -1,6 +1,7 @@
 # 本文档为4象限的任务清单，全文书写大白话
 
 ## 想做：
+- 完成 C0verSnow 仓库 issue #1：整理 Cloudflare Pages 目录，根网址直接打开整张截图编辑页，提交 PR、跑远端检查并关闭 issue。
 - 完成 issue #7：名字、电话和地址都能修改，确认后自动下载整张 PNG 照片，更新文档、提交 PR、跑远端测试并关闭 issue。
 - 完成 issue #5：整张截图离线展示，点击地址弹窗修改，只改地址，提供脚本和网页资源，提交 PR、跑远端测试并关闭 issue。
 - 完成 issue #3：把 02_address 地址区做成一比一对齐的离线网页，提供脚本和需要的网页资源。
@@ -9,6 +10,8 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- 已同步 C0verSnow/SFExpressReturnPicture，阅读唯一未完成的 issue #1（Cloudflare 部署）；本文件下方历史 issue 编号属于原 f1515x 仓库。
+- 已创建 feature/issue-1-cloudflare-pages 分支；确认 Pages 需要 index.html，采用独立 pages 目录和无需构建的部署方式。
 - issue #7 的四项远端检查全部通过（Python 3.10、3.13、旧地址页、新整页）：https://github.com/f1515x/SFExpressReturnPicture/actions/runs/37571229761 。
 - 已更新 PR #8，并按用户要求关闭 issue #7；PR 保持打开，留给用户审阅。
 - 已取回并核对远端产物，放在 offline-return-page/issue-7，查看了最终照片和弹窗；双击 return-page.html 可直接使用，不需要本地生成或编译。
@@ -55,4 +58,4 @@
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- 没有正在执行的事项，issue #7 已完成。
+- 正在整理部署目录、部署说明和远端 HTTP 浏览器检查。

@@ -1,5 +1,27 @@
 # SFExpressReturnPicture
 
+## 部署到 Cloudflare Pages（C0verSnow 仓库 issue #1）
+
+`pages/` 是可直接发布的完整静态网站目录。首页 `index.html` 就是整张退货截图编辑页，点击灰色地址区修改名字、电话和地址，确认后下载 PNG。它包含 HTML、JS、SVG、完整中文字体、字体许可和初始地址配置，不需要服务器接口。
+
+在 Cloudflare 的 **Workers & Pages → Create application → Pages → Import an existing Git repository** 选择本仓库。先把本次 PR 合并到 `main`，然后使用以下设置：
+
+| 设置 | 填写内容 |
+| --- | --- |
+| Framework preset | None |
+| Production branch | `main` |
+| Root directory | 留空（仓库根目录） |
+| Build command | `exit 0` |
+| Build output directory | `pages` |
+
+保存并部署后，直接打开 Cloudflare 给出的 `https://项目名.pages.dev/`。首页无需补文件名；旧的 `/return-page.html` 路径通过 `_redirects` 回到首页。`404.html` 让不存在的路径显示错误页，避免被当成单页应用首页。详细设置见 [Cloudflare 静态 HTML 指南](https://developers.cloudflare.com/pages/framework-guides/deploy-anything/)。也可以把 `pages/` 的全部内容直接上传到 Pages；上传时确保 `index.html` 在发布目录的第一层。
+
+HTML 已内嵌底图、字体和交互，可以单独下载使用；旁边的 JS、SVG、字体及许可一并保留，方便查看和维护。单个发布文件必须不超过 [Pages 的 25 MiB 限制](https://developers.cloudflare.com/pages/platform/limits/)，远端生成时会检查。
+
+修改截图、模板或初始配置后，部署文件也需要更新：由远端 GitHub Actions 的 `cloudflare-pages` 检查运行 `python prepare_pages.py`，下载 `cloudflare-pages-site` 附件，将附件内容替换到 `pages/` 并提交。不要在本地运行生成或验证。CI 会重新生成并逐文件比较，避免发布旧版本。`cloudflare-pages-check` 附件包含网页预览和实际下载的 PNG；远端浏览器检查 HTTP 首页、资源访问、修改三个字段、照片下载、配置导出及保存网页后断网重开。
+
+Cloudflare 账号的连接和首次部署需要在你的 Cloudflare 后台完成。CI 使用 HTTP 静态站验证发布目录，不代表已经发布到真实的 `pages.dev` 域名。部署成功后可打开根网址，修改一次地址，确认浏览器下载了完整照片。
+
 把已经保存好的退货长截图，按商家地址的浅灰色区块切成 3 张 PNG：
 
 1. `01_top.png`：灰色区上方。
