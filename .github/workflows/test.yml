@@ -33,6 +33,7 @@ jobs:
           python-version: '3.13'
       - run: python -m pip install -r requirements.txt playwright==1.55.0
       - run: playwright install --with-deps chromium
+      - run: python split_screenshot.py "2026-10-06 11.08.30.jpg" --output-dir output
       - run: python address_to_html.py --output-dir offline-address
       - run: python tests/browser_address.py
       - uses: actions/upload-artifact@v4

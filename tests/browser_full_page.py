@@ -96,7 +96,7 @@ with sync_playwright() as p:
     assert page.locator('#rendered-photo').is_hidden()
     assert not downloads
     assert json.loads(page.locator('#address-state').text_content())['merchant'] == '多联科技'
-    page.evaluate('HTMLCanvasElement.prototype.toBlob = window.realToBlob')
+    page.evaluate('() => { HTMLCanvasElement.prototype.toBlob = window.realToBlob; }')
     confirm(page, OUT / 'merchant-only.png')
     changes_only(OUT / 'initial.png', OUT / 'merchant-only.png', ['merchant'])
     page.locator('#edit-address').click()
