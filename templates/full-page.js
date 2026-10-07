@@ -21,6 +21,7 @@
     return Object.keys(fields).some(key => JSON.stringify(data[key]) !== JSON.stringify(original[key]));
   }
   async function photo(data) {
+    await document.fonts.load('48px Address');
     await document.fonts.ready;
     await get('source').decode();
     const canvas = document.createElement('canvas');
