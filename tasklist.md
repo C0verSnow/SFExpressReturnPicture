@@ -9,3 +9,4 @@
 
 ## 在做：
 - [1793101129] 按用户要求为已有改动准备草稿 PR。
+- [1793101142] 已提交草稿 PR：https://github.com/C0verSnow/SFExpressReturnPicture/pull/6；issue #5 仍未完成，浏览器检查需要排查。
