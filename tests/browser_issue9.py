@@ -1,0 +1,110 @@
+"""Remote regression: issue #9 addresses and dark/automatic-dark photo pixels."""
+import base64
+import io
+from pathlib import Path
+
+from PIL import Image, ImageChops
+from playwright.sync_api import sync_playwright
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / 'pages-check'
+
+
+def image_bytes(page):
+    return base64.b64decode(page.locator('#rendered-photo').evaluate(
+        "canvas => canvas.toDataURL('image/png').split(',')[1]"))
+
+
+def same_pixels(first, second):
+    with Image.open(io.BytesIO(first)) as a, Image.open(io.BytesIO(second)) as b:
+        return ImageChops.difference(a.convert('RGB'), b.convert('RGB')).getbbox() is None
+
+
+def check_addresses(page):
+    cases = [
+        ('北京 北京市 通州区 宋庄镇 北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院',
+         '北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院'),
+        ('广东省广东省深圳市深圳市南山区南山区科技园1号', '广东省深圳市南山区科技园1号'),
+        ('广东省深圳市南山区粤海街道广东省深圳市南山区粤海街道科技园1号',
+         '广东省深圳市南山区粤海街道科技园1号'),
+        ('北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院',
+         '北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院'),
+        ('北京市朝阳区北京市朝阳区实验学校1号楼', '北京市朝阳区实验学校1号楼'),
+        ('广东省深圳市南山区南山大道北京银行1号', '广东省深圳市南山区南山大道北京银行1号'),
+        ('广东省深圳市南山区科技园（东门）1号', '广东省深圳市南山区科技园（东门）1号'),
+    ]
+    for address, expected in cases:
+        page.locator('#paste-input').fill('收件人：张三 电话：13800138000 地址：' + address)
+        assert page.locator('#error').text_content() == '', (address, page.locator('#error').text_content())
+        lines = page.locator('#address-input').input_value().splitlines()
+        assert len(lines) == 3 and all(lines), lines
+        assert ''.join(lines) == expected, (address, lines, expected)
+
+
+def run():
+    failures = []
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        for filename in ('pages-site/index.html', 'offline-return-page/return-page.html'):
+            initial = edited = visual = None
+            for mode in ('light', 'dark', 'auto-dark'):
+                context = browser.new_context(viewport={'width': 390, 'height': 844},
+                                              color_scheme='light' if mode == 'light' else 'dark')
+                context.set_offline(True)
+                page = context.new_page()
+                if mode == 'auto-dark':
+                    context.new_cdp_session(page).send('Emulation.setAutoDarkModeOverride', {'enabled': True})
+                label = ('site' if filename.startswith('pages-site') else 'offline') + '-' + mode
+                page.goto((ROOT / filename).as_uri())
+                page.wait_for_function("!document.getElementById('save-photo').disabled")
+                current = image_bytes(page)
+                (OUT / f'issue9-{label}-initial.png').write_bytes(current)
+                preview = page.locator('#rendered-photo').screenshot()
+                if mode == 'light':
+                    initial, visual = current, preview
+                else:
+                    if not same_pixels(initial, current):
+                        failures.append(f'{label}: initial PNG changes with dark mode')
+                    if not same_pixels(visual, preview):
+                        failures.append(f'{label}: visible photo changes with dark mode')
+                page.locator('#edit-address').click()
+                page.screenshot(path=str(OUT / f'issue9-{label}-dialog.png'))
+                try:
+                    check_addresses(page)
+                except AssertionError as error:
+                    failures.append(f'{label}: address regression: {error}')
+                page.locator('#merchant-input').fill('新商家')
+                page.locator('#phone-input').fill('13800138000')
+                page.locator('#address-input').fill('福建省泉州市惠安县\n张坂镇台商投资区中熙产业园\n3期2栋C梯5楼-1')
+                with page.expect_download() as pending:
+                    page.locator('#confirm').click()
+                target = OUT / f'issue9-{label}-edited.png'
+                pending.value.save_as(target)
+                page.wait_for_function("!document.getElementById('editor').open")
+                exported = target.read_bytes()
+                if not same_pixels(exported, image_bytes(page)):
+                    failures.append(f'{label}: download differs from preview')
+                if mode == 'light':
+                    edited = exported
+                elif not same_pixels(edited, exported):
+                    failures.append(f'{label}: edited PNG changes with dark mode')
+                # Force a second draw from the existing preview, the user's exact edit path.
+                page.locator('#edit-address').click()
+                page.locator('#merchant-input').fill('张三')
+                with page.expect_download() as pending:
+                    page.locator('#confirm').click()
+                pending.value.save_as(OUT / f'issue9-{label}-second-edit.png')
+                page.wait_for_function("!document.getElementById('editor').open")
+                second = (OUT / f'issue9-{label}-second-edit.png').read_bytes()
+                with Image.open(io.BytesIO(exported)) as a, Image.open(io.BytesIO(second)) as b:
+                    delta = ImageChops.difference(a.convert('RGB'), b.convert('RGB'))
+                    delta.paste((0, 0, 0), (362, 1708, 566, 1784))
+                    if delta.getbbox() is not None:
+                        failures.append(f'{label}: second edit changed unedited photo pixels')
+                context.close()
+        browser.close()
+    assert not failures, '\n'.join(failures)
+
+
+if __name__ == '__main__':
+    run()
