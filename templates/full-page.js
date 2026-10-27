@@ -15,6 +15,7 @@
   fitPlatform();
   window.addEventListener('resize', fitPlatform);
   const state = JSON.parse(get('address-state').textContent);
+  const initialState = structuredClone(state);
   const original = {merchant: '多联科技', phone: '18925023056', lines: [
     '广东省广州市增城区 永宁街道和兴路鑫耀汽',
     '车贴膜对面驿站5号箱(请用纸盒包装好，勿', '发到付)']};
@@ -27,6 +28,7 @@
   const dialog = get('editor');
   let busy = false;
   let currentPNG;
+  let initialPhoto;
   function font(ctx) {
     ctx.font = '48px Address';
     ctx.fontKerning = 'none';
@@ -41,11 +43,20 @@
     canvas.width = 1182; canvas.height = 2560;
     // Use a consistent software surface for PNGs on every device.
     const ctx = canvas.getContext('2d', {alpha: false, willReadFrequently: true});
-    ctx.drawImage(get('source'), 0, 0);
+    ctx.drawImage(currentPNG ? get('rendered-photo') : get('source'), 0, 0);
     font(ctx);
     for (const [key, field] of Object.entries(fields)) {
-      // Leave unchanged fields as their original pixels, including original glyphs.
-      if (JSON.stringify(data[key]) === JSON.stringify(original[key])) continue;
+      // Preserve untouched pixels: re-rasterizing identical digits after text
+      // measurement can produce different antialiasing in Chromium.
+      if (currentPNG && JSON.stringify(data[key]) === JSON.stringify(state[key])) continue;
+      if (initialPhoto && JSON.stringify(data[key]) === JSON.stringify(initialState[key])) {
+        ctx.drawImage(initialPhoto, ...field.box, ...field.box);
+        continue;
+      }
+      if (JSON.stringify(data[key]) === JSON.stringify(original[key])) {
+        ctx.drawImage(get('source'), ...field.box, ...field.box);
+        continue;
+      }
       ctx.fillStyle = '#f6f6f6';
       ctx.fillRect(...field.box);
       ctx.fillStyle = field.color;
@@ -255,6 +266,7 @@
     const canvas = await photo(state);
     const blob = await png(canvas);
     render(canvas, blob);
+    initialPhoto = canvas;
     get('edit-address').disabled = false;
     get('save-photo').disabled = false;
   }
