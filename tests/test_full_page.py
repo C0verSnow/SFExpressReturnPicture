@@ -15,7 +15,10 @@ class FullPageTests(unittest.TestCase):
             original = page.read_bytes()
             self.assertIn(b'data:image/png;base64,', original)
             self.assertIn(b'data:font/otf;base64,', original)
-            for name in ('full-page.js', 'address-dialog.svg', 'NotoSansCJKsc-Regular.otf', 'OFL.txt'):
+            self.assertIn(b'id="region-data"', original)
+            self.assertIn(b'Copyright (c) 2024 Haole Zheng', original)
+            self.assertNotIn(b'@@REGIONS@@', original)
+            for name in ('full-page.js', 'address-dialog.svg', 'NotoSansCJKsc-Regular.otf', 'OFL.txt', 'regions-LICENSE.txt'):
                 self.assertTrue((output / name).is_file())
             with self.assertRaises(ValueError):
                 export_page(ROOT / 'address.json', output)

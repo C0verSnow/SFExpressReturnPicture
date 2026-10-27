@@ -12,6 +12,8 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- [1793102169] 已补齐粘贴自动回填、离线省市区数据、简称与直辖市补全、三行按字体宽度分配；保留手改，失败不覆盖原填写内容。
+- [1793102169] 已扩充远端样例、初始化失败和逐帧防闪现检查，更新说明、来源比较与许可证；准备推送远端验证，发布文件随后从 CI 取回。
 - issue #3 最终三项远端检查全部通过，已确认 pages/ 与远端重新生成的所有文件完全一致：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/37598930506 。
 - 已取回并查看 Desktop、Laptop、Tablet、Mobile 和弹窗预览；默认文字、修改按钮及唯一照片保存按钮位置正常，下载照片维持原始分辨率。
 - PR #4 已从草稿改为可审阅，完整 pages/、说明和执行记录已提交；PR 留给用户审阅，合并后自动关闭 issue #3：https://github.com/C0verSnow/SFExpressReturnPicture/pull/4 。
