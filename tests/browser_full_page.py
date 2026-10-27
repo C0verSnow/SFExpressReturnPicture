@@ -50,10 +50,24 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('download', lambda download: downloads.append(download))
     page.on('request', lambda request: requests.append(request.url) if request.url.startswith(('http:', 'https:')) else None)
+    # Hold image decoding so the initial loading state is observable.
+    page.add_init_script('''(() => {
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = function() {
+        return new Promise(resolve => { window.releaseImageDecode = resolve; })
+          .then(() => decode.call(this));
+      };
+    })();''')
     page.goto((OUT / 'return-page.html').as_uri())
+    page.wait_for_function('window.releaseImageDecode !== undefined')
+    assert not page.locator('#source').is_visible()
+    assert not page.locator('#rendered-photo').is_visible()
+    page.evaluate('window.releaseImageDecode()')
     page.wait_for_function("!document.getElementById('edit-address').disabled")
     assert page.locator('#tools button').count() == 1
     assert page.locator('#license, #save, #save-json').count() == 0
+    assert page.locator('#rendered-photo').is_visible()
+    assert not page.locator('#source').is_visible()
     initial = pixels(page, 'initial.png')
     with Image.open(ROOT / '2026-10-06 11.08.30.jpg') as source:
         reference = ImageCms.profileToProfile(source.convert('RGB'),
@@ -111,6 +125,8 @@ with sync_playwright() as p:
         page.locator('#save-photo').click()
     pending.value.save_as(OUT / 'saved-again.png')
     assert (OUT / 'saved-again.png').read_bytes() == (OUT / 'confirmed-photo.png').read_bytes()
+    assert not page.locator('#source').is_visible()
+    assert page.locator('#rendered-photo').is_visible()
     page.locator('#edit-address').click()
     page.locator('#address-input').fill('</script><img src=x>\n第二行\n第三行')
     confirm(page, OUT / 'escaped-photo.png')
@@ -123,6 +139,8 @@ with sync_playwright() as p:
     confirm(page, OUT / 'restored.png')
     with Image.open(OUT / 'original.png') as original, Image.open(OUT / 'restored.png') as restored:
         assert ImageChops.difference(original, restored.convert('RGB')).getbbox() is None
+    assert not page.locator('#source').is_visible()
+    assert page.locator('#rendered-photo').is_visible()
     # Classify device hints, resize across categories, and inspect every recommended canvas.
     for platform, width, height, touch in [('desktop', 1920, 1080, False), ('laptop', 1440, 900, False),
                                          ('tablet', 768, 1024, True), ('mobile', 390, 844, True)]:

@@ -33,9 +33,6 @@
     ctx.letterSpacing = '-0.5px';
     ctx.textBaseline = 'alphabetic';
   }
-  function changed(data) {
-    return Object.keys(fields).some(key => JSON.stringify(data[key]) !== JSON.stringify(original[key]));
-  }
   async function photo(data) {
     await document.fonts.load('48px Address');
     await document.fonts.ready;
@@ -60,7 +57,7 @@
   function render(canvas, blob) {
     currentPNG = blob;
     get('rendered-photo').getContext('2d').drawImage(canvas, 0, 0);
-    get('rendered-photo').hidden = !changed(state);
+    get('rendered-photo').hidden = false;
     get('rendered-photo').setAttribute('aria-label', `${state.merchant} ${state.phone} ${state.lines.join(' ')}`);
     get('address-state').textContent = JSON.stringify(state).replace(/</g, '\\u003c');
   }
