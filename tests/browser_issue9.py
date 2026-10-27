@@ -87,10 +87,12 @@ def run():
     OUT.mkdir(exist_ok=True)
     failures = []
     with sync_playwright() as p:
-        browser = p.chromium.launch()
         for filename in ('pages-site/index.html', 'offline-return-page/return-page.html'):
             initial = edited = visual = None
             for mode in ('light', 'dark', 'auto-dark'):
+                # Isolate Chromium's process-wide text caches so the only changed
+                # variable is the theme, not shaping work from previous scenarios.
+                browser = p.chromium.launch()
                 context = browser.new_context(viewport={'width': 390, 'height': 844},
                                               color_scheme='light' if mode == 'light' else 'dark')
                 context.set_offline(True)
@@ -148,7 +150,7 @@ def run():
                     if delta.getbbox() is not None:
                         failures.append(f'{label}: second edit changed unedited photo pixels')
                 context.close()
-        browser.close()
+                browser.close()
     assert not failures, '\n'.join(failures)
 
 
