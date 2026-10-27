@@ -102,14 +102,48 @@
     // Do not invent a city for province-administered counties or missing data.
     return province && city ? [{province, city, county}] : [];
   });
+  function regionLevels(path) {
+    // Municipalities have two data levels but only one name in a postal address.
+    return [...new Set([path.province, path.city, path.county])];
+  }
+  function stripKnownRegionPrefix(detail, levels) {
+    // Full names only: a county alias such as 南山 may be part of 南山大道.
+    let previous;
+    do {
+      previous = detail;
+      for (const name of levels) {
+        while (detail.startsWith(name)) detail = detail.slice(name.length);
+      }
+    } while (previous !== detail);
+    return detail;
+  }
+  function normalizeDetail(detail, levels) {
+    let rest = stripKnownRegionPrefix(detail, levels);
+    // Township names are taken verbatim from the input, never guessed from a
+    // database. Only remove an identical leading town after a repeated region.
+    const town = rest.match(/^([\p{Script=Han}]{1,12}?(?:街道|镇|乡|苏木))/u)?.[0];
+    if (!town) return rest;
+    rest = rest.slice(town.length);
+    while (true) {
+      const next = stripKnownRegionPrefix(rest, levels);
+      if (next.startsWith(town)) rest = next.slice(town.length);
+      else if (next !== rest) rest = next;
+      else break;
+    }
+    return town + rest;
+  }
   function parseRegion(address) {
     const candidates = [];
     for (const path of paths) {
       let rest = address, score = 0;
-      for (const key of ['province', 'city', 'county']) {
-        const match = aliases(path[key]).find(alias => rest.startsWith(alias));
-        if (match) { rest = rest.slice(match.length); score += match.length; }
-        else if (key === 'county') { score = 0; break; }
+      for (const name of regionLevels(path)) {
+        const match = aliases(name).find(alias => rest.startsWith(alias));
+        if (match) {
+          rest = rest.slice(match.length); score += match.length;
+          while (rest.startsWith(name)) {
+            rest = rest.slice(name.length); score += name.length;
+          }
+        } else if (name === path.county) { score = 0; break; }
       }
       if (score) candidates.push({...path, detail: rest, score});
     }
@@ -118,8 +152,9 @@
     if (candidates[1]?.score === candidates[0].score) {
       throw new Error('地址有多个同名地区，请补上省、市后重新解析。');
     }
-    const {province, city, county, detail} = candidates[0];
-    return province + city + county + detail;
+    const path = candidates[0];
+    const levels = regionLevels(path);
+    return levels.join('') + normalizeDetail(path.detail, levels);
   }
   function parseContact(text) {
     if (!text.trim() || text.length > 2000) throw new Error('请粘贴一位收件人的完整信息，最多 2000 字。');
@@ -173,6 +208,31 @@
     }
     return best;
   }
+  function annotationRanges(address) {
+    const stack = [], ranges = [];
+    for (let i = 0; i < address.length; i++) {
+      if ('(（'.includes(address[i])) stack.push(i);
+      else if (')）'.includes(address[i]) && stack.length) {
+        const start = stack.pop();
+        if (!stack.length) ranges.push([start, i + 1]);
+      }
+    }
+    return ranges;
+  }
+  function fitAddress(address, ctx, width) {
+    let lines = splitAddress(address, ctx, width);
+    const omitted = [];
+    if (lines) return {lines, omitted};
+    // Preserve the complete address whenever possible. Remove paired notes from
+    // the end one at a time, stopping as soon as three nonempty lines fit.
+    for (const [start, end] of annotationRanges(address).reverse()) {
+      omitted.unshift(address.slice(start, end));
+      address = address.slice(0, start) + address.slice(end);
+      lines = splitAddress(address, ctx, width);
+      if (lines) return {lines, omitted};
+    }
+    throw new Error('地址太长或太短，无法放进三行，请手动调整；原填写内容已保留。');
+  }
   function parsePastedContact() {
     if (busy) return;
     get('error').textContent = '';
@@ -181,12 +241,13 @@
       const parsed = parseContact(get('paste-input').value);
       const ctx = document.createElement('canvas').getContext('2d', {alpha: false, willReadFrequently: true});
       font(ctx);
-      const lines = splitAddress(parsed.address, ctx, fields.lines.width);
-      if (!lines) throw new Error('地址太长或太短，无法放进三行，请手动调整；原填写内容已保留。');
+      const {lines, omitted} = fitAddress(parsed.address, ctx, fields.lines.width);
       get('merchant-input').value = parsed.name;
       get('phone-input').value = parsed.phone;
       get('address-input').value = lines.join('\n');
-      get('parse-status').textContent = '解析完成，请核对后点击确认修改。';
+      get('parse-status').textContent = omitted.length
+        ? `解析完成，已省略括号附注：${omitted.join('、')}。请核对后点击确认修改。`
+        : '解析完成，请核对后点击确认修改。';
     } catch (error) {
       get('error').textContent = error.message;
     }
