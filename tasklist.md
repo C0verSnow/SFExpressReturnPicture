@@ -14,6 +14,8 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- [1793122556] 远端回归在 cb75d5b 上复现北京样例重复和 Chrome 自动深色下的预览差异；系统深色及下载像素未复现大面积变黑。已按官方设计添加 only light 和明确控件颜色，修复开头省市区及镇街去重，增加仅超宽时逐个裁剪配对括号并提示删去内容的逻辑；正在远端核对。
+- [1793122405] 用户已确认：能放进三行就保留括号；放不下再删括号附注。已查看 issue 两张图片，发现下载 PNG 的底图也变黑。已先提交远端回归检查，对比普通浅色、系统深色、Chrome 自动深色和连续编辑；首轮因新增检查未建输出目录失败，已修正并重新推送。
 - [1793120718] C0verSnow issue #7 已完成：PR #8 已按用户授权合并到 main，合并提交 a6c1b0c6fc769c49765979435b5c80e71bb6330a；GitHub 已自动关闭 issue #7，并确认状态为 closed：https://github.com/C0verSnow/SFExpressReturnPicture/pull/8 。
 - [1793120718] 最终功能提交 cff11cd 的 push 和 PR 两份远端工作流全部通过：Python 3.10、3.13、真实剪贴板、异常回退、在线离线、四类屏幕、PNG 像素、防闪现及 pages/ 逐文件一致性：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40545937150 和 https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40545947545 。
 - [1793120718] 已查看远端弹窗与手机截图，新按钮和深圳示例显示正常；README、模板、远端测试、GitHub 候选比较和远端生成的发布文件均已合并。已在 GitHub 检索并比较 VueUse、clipboard.js、clipboard-polyfill，仅借鉴能力检测与失败处理设计，没有引入依赖或复制代码。

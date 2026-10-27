@@ -32,6 +32,13 @@ def check_addresses(page):
         ('北京市朝阳区北京市朝阳区实验学校1号楼', '北京市朝阳区实验学校1号楼'),
         ('广东省深圳市南山区南山大道北京银行1号', '广东省深圳市南山区南山大道北京银行1号'),
         ('广东省深圳市南山区科技园（东门）1号', '广东省深圳市南山区科技园（东门）1号'),
+        ('北京通州区1号', '北京市通州区1号'),
+        ('广东省深圳市南山区广东省深圳市南山区广东省深圳市南山区科技园1号',
+         '广东省深圳市南山区科技园1号'),
+        ('广东省深圳市南山区粤海街道粤海街道科技园1号',
+         '广东省深圳市南山区粤海街道科技园1号'),
+        ('福建省泉州市惠安县 张坂镇台商投资区中熙产业园3期2栋C梯5楼-1(拼多多平台Coldelement旗舰店）',
+         '福建省泉州市惠安县张坂镇台商投资区中熙产业园3期2栋C梯5楼-1(拼多多平台Coldelement旗舰店）'),
     ]
     for address, expected in cases:
         page.locator('#paste-input').fill('收件人：张三 电话：13800138000 地址：' + address)
@@ -39,6 +46,41 @@ def check_addresses(page):
         lines = page.locator('#address-input').input_value().splitlines()
         assert len(lines) == 3 and all(lines), lines
         assert ''.join(lines) == expected, (address, lines, expected)
+        assert '已省略' not in page.locator('#parse-status').text_content()
+    base = '福建省泉州市惠安县张坂镇台商投资区中熙产业园3期2栋C梯5楼-1'
+    # The literal issue sample fits; make the note longer to exercise actual overflow.
+    for note in ('(' + '拼多多平台Coldelement旗舰店' * 10 + '）',
+                 '（店铺(' + '平台说明' * 30 + '）备注)',
+                 '（' + '平台说明' * 30 + '）(另一条说明)'):
+        page.locator('#paste-input').fill('冷元素售后 18059175529 ' + base + note)
+        assert page.locator('#error').text_content() == ''
+        assert page.locator('#merchant-input').input_value() == '冷元素售后'
+        assert page.locator('#phone-input').input_value() == '18059175529'
+        assert ''.join(page.locator('#address-input').input_value().splitlines()) == base
+        assert '已省略括号附注' in page.locator('#parse-status').text_content()
+    # Drop only the rightmost note when that is enough; retain the useful short note.
+    page.locator('#paste-input').fill('张三 13800138000 ' + base + '（东门）(' + '说明' * 100 + ')')
+    assert ''.join(page.locator('#address-input').input_value().splitlines()) == base + '（东门）'
+    assert '已省略括号附注' in page.locator('#parse-status').text_content()
+    previous = [page.locator(s).input_value() for s in
+                ('#merchant-input', '#phone-input', '#address-input')]
+    for address in (base + '(' + '说明' * 100, base + '长' * 100 + '(店铺说明)',
+                    base + '长' * 100 + ')'):
+        page.locator('#paste-input').fill('李四 13900139000 ' + address)
+        assert page.locator('#error').text_content()
+        assert [page.locator(s).input_value() for s in
+                ('#merchant-input', '#phone-input', '#address-input')] == previous
+
+
+def assert_readable_editor(page):
+    # The photo keeps its original palette; the surrounding form must also be readable.
+    for selector in ('#editor', '#paste-input', '#merchant-input', '#phone-input', '#address-input'):
+        colors = page.locator(selector).evaluate('''element => {
+          const style = getComputedStyle(element);
+          return [style.color, style.backgroundColor];
+        }''')
+        assert colors == ['rgb(37, 40, 50)', 'rgb(255, 255, 255)' if selector == '#editor'
+                          else 'rgb(250, 251, 252)'], (selector, colors)
 
 
 def run():
@@ -60,7 +102,9 @@ def run():
                 page.wait_for_function("!document.getElementById('save-photo').disabled")
                 current = image_bytes(page)
                 (OUT / f'issue9-{label}-initial.png').write_bytes(current)
-                preview = page.locator('#rendered-photo').screenshot()
+                preview = page.locator('#rendered-photo').screenshot(
+                    style='#tools,#edit-address{visibility:hidden}')
+                (OUT / f'issue9-{label}-visible.png').write_bytes(preview)
                 if mode == 'light':
                     initial, visual = current, preview
                 else:
@@ -71,6 +115,7 @@ def run():
                 page.locator('#edit-address').click()
                 page.screenshot(path=str(OUT / f'issue9-{label}-dialog.png'))
                 try:
+                    assert_readable_editor(page)
                     check_addresses(page)
                 except AssertionError as error:
                     failures.append(f'{label}: address regression: {error}')
