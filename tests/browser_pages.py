@@ -8,6 +8,7 @@ from pathlib import Path
 
 from PIL import Image, ImageChops
 from playwright.sync_api import sync_playwright
+from clipboard_checks import check_clipboard
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / 'pages-site'
@@ -35,7 +36,14 @@ try:
             assert response.body() == (SITE / filename).read_bytes(), filename
         assert page.request.get(base + '/404.html').status == 200
         page.locator('#edit-address').click()
-        page.locator('#paste-input').fill('收件人：新商家\n电话：13800138000\n地址：上海市浦东新区新地址100号')
+        check_clipboard(page)
+        # Exercise the real browser clipboard in a trustworthy HTTP loopback origin.
+        page.context.grant_permissions(['clipboard-read', 'clipboard-write'], origin=base)
+        text = '收件人：新商家\n电话：13800138000\n地址：上海市浦东新区新地址100号'
+        page.evaluate('text => navigator.clipboard.writeText(text)', text)
+        page.locator('#parse-address').click()
+        page.wait_for_function("document.getElementById('parse-status').textContent.startsWith('解析完成')")
+        assert page.locator('#paste-input').input_value() == text
         assert page.locator('#merchant-input').input_value() == '新商家'
         assert page.locator('#phone-input').input_value() == '13800138000'
         assert ''.join(page.locator('#address-input').input_value().split('\n')) == '上海市上海市浦东新区新地址100号'

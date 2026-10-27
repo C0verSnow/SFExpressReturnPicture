@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 from PIL import Image, ImageChops, ImageCms
 from playwright.sync_api import sync_playwright
+from clipboard_checks import SAMPLE, assert_sample, check_clipboard, click_and_wait, mock_clipboard
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'offline-return-page'
@@ -93,6 +94,8 @@ with sync_playwright() as p:
     assert page.locator('#phone-input').input_value() == '18888888888'
     assert page.locator('#address-input').input_value() == '广东省\n深圳市\n南山区人才公园'
     page.screenshot(path=str(OUT / 'dialog.png'))
+    check_clipboard(page)
+    assert not downloads, 'Clipboard parsing must wait for confirmation before downloading'
     samples = [
         ('收货人:Howard\n手机号码:18519079788\n地址信息: 北京 北京市 通州区 宋庄镇 北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院',
          'Howard', '18519079788', '北京市北京市通州区宋庄镇北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院'),
@@ -124,7 +127,6 @@ with sync_playwright() as p:
         assert page.locator('#parse-status').text_content().startswith('解析完成')
         assert page.locator('#error').text_content() == ''
         assert not downloads, 'Parsing must wait for confirmation before downloading'
-    page.locator('#parse-address').click()
     page.screenshot(path=str(OUT / 'parsed-dialog.png'))
     unchanged = [page.locator(selector).input_value() for selector in
                  ('#merchant-input', '#phone-input', '#address-input')]
@@ -234,6 +236,9 @@ with sync_playwright() as p:
         dialog = view.locator('#editor').bounding_box()
         assert dialog['x'] >= 0 and dialog['y'] >= 0
         assert dialog['width'] <= width and dialog['height'] <= height - 32
+        mock_clipboard(view, 'success', SAMPLE)
+        click_and_wait(view)
+        assert_sample(view)
         view.locator('#merchant-input').fill('新商家')
         view.locator('#phone-input').fill('13800138000')
         view.locator('#address-input').fill('上海市\n浦东新区\n新地址 100 号')
