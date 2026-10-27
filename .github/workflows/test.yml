@@ -35,16 +35,17 @@ jobs:
       - run: playwright install --with-deps chromium
       - name: Generate once and verify HTTP, offline and responsive flows
         run: python workflow.py verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloudflare-pages-site
+          path: pages-site/
+          if-no-files-found: error
       - name: Check committed deployment files match remote generation
         run: |
           if [ -f pages/index.html ]; then
             diff -qr pages pages-site
           fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cloudflare-pages-site
-          path: pages-site/
-          if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:

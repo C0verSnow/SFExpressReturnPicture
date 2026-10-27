@@ -50,7 +50,28 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('download', lambda download: downloads.append(download))
     page.on('request', lambda request: requests.append(request.url) if request.url.startswith(('http:', 'https:')) else None)
+    # Hold image decoding so the loading state is observable before the first render.
+    page.add_init_script("""(() => {
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = async function() {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        return decode.call(this);
+      };
+      window.rawImageFrames = [];
+      function watch() {
+        const source = document.getElementById('source');
+        if (source) {
+          const style = getComputedStyle(source);
+          if (style.display !== 'none' && style.visibility !== 'hidden') {
+            window.rawImageFrames.push(performance.now());
+          }
+        }
+        requestAnimationFrame(watch);
+      }
+      requestAnimationFrame(watch);
+    })();""")
     page.goto((OUT / 'return-page.html').as_uri())
+    assert page.locator('#source').is_hidden(), 'Raw address is visible while preview loads'
     page.wait_for_function("!document.getElementById('edit-address').disabled")
     assert page.locator('#tools button').count() == 1
     assert page.locator('#license, #save, #save-json').count() == 0
@@ -154,6 +175,7 @@ with sync_playwright() as p:
             view.wait_for_function("document.documentElement.dataset.platform === 'mobile'")
             assert view.evaluate('document.documentElement.scrollWidth <= innerWidth')
         device.close()
+    assert page.evaluate('window.rawImageFrames.length') == 0, 'Raw image was exposed during loading or downloads'
     assert not errors, errors
     assert not requests, requests
     browser.close()
