@@ -191,10 +191,51 @@
       get('error').textContent = error.message;
     }
   }
-  get('parse-address').onclick = parsePastedContact;
+  let clipboardRequest = 0;
+  function cancelClipboardRead() {
+    clipboardRequest++;
+    get('parse-address').disabled = false;
+  }
+  get('parse-address').onclick = async () => {
+    const button = get('parse-address');
+    if (busy || button.disabled) return;
+    const request = ++clipboardRequest;
+    const input = get('paste-input');
+    const error = get('error');
+    error.textContent = '';
+    get('parse-status').textContent = '';
+    button.disabled = true;
+    try {
+      if (typeof navigator.clipboard?.readText !== 'function') {
+        error.textContent = '当前浏览器无法自动读取剪贴板，请手动粘贴收件信息。';
+        input.focus();
+        return;
+      }
+      // Call from the click before any await, preserving Safari user activation.
+      // Support/error handling follows VueUse useClipboard; see docs/clipboard-research.md.
+      const text = await navigator.clipboard.readText();
+      if (request !== clipboardRequest || !dialog.open || busy) return;
+      if (!text.trim()) {
+        error.textContent = '剪贴板暂无内容';
+        return;
+      }
+      input.value = text;
+      parsePastedContact();
+    } catch (err) {
+      if (request !== clipboardRequest || !dialog.open || busy) return;
+      error.textContent = '读取剪贴板失败或权限被拒绝，请手动粘贴收件信息。';
+      input.focus();
+    } finally {
+      if (request === clipboardRequest) button.disabled = false;
+    }
+  };
+  // A delayed permission response must not overwrite a later edit or dialog session.
+  get('address-form').addEventListener('input', cancelClipboardRead);
+  dialog.addEventListener('close', cancelClipboardRead);
   // The input event runs after a paste has populated the textarea, including on mobile.
   get('paste-input').addEventListener('input', parsePastedContact);
   get('edit-address').onclick = () => {
+    cancelClipboardRead();
     get('paste-input').value = '';
     get('parse-status').textContent = '';
     get('merchant-input').value = state.merchant;
@@ -209,6 +250,7 @@
   get('address-form').onsubmit = async event => {
     event.preventDefault();
     if (busy) return;
+    cancelClipboardRead();
     busy = true;
     get('confirm').disabled = true;
     get('error').textContent = '';

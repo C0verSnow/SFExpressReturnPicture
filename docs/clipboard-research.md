@@ -4,8 +4,8 @@
 
 | 项目 | 维护、许可与问题 | 实现与依赖 | 选择 |
 | --- | --- | --- | --- |
-| [VueUse useClipboard](https://github.com/vueuse/vueuse/blob/e32dff3abacaf6aa531dbbbd617fb21b697b7104/packages/core/useClipboard/index.ts) | 22398 stars，MIT，仓库 2026-10-27 有推送；该模块 2026-09-02 有提交。历史 [#1639](https://github.com/vueuse/vueuse/issues/1639) 提醒 API 不可用时不能假定成功。 | 检测 API、调用异步读取、捕获失败；依赖 Vue、共享工具、权限与事件封装。旧式读取回退是当前选择的文字，不能当作系统剪贴板。 | 借鉴能力检测和失败处理，不引入 Vue。为兼容 Safari，不照搬权限预查询与选择文字回退。 |
-| [clipboard.js](https://github.com/zenorocha/clipboard.js) | 34095 stars，MIT，2026-02-12 有维护提交；[#875](https://github.com/zenorocha/clipboard.js/issues/875) 提出 execCommand 弃用问题，维护者已关闭处理。 | 事件委托、选择文本、复制/剪切；依赖 good-listener、select、tiny-emitter。 | 可作复制交互比较，但没有设备剪贴板读取能力，不能解决本需求，不采用其实现。 |
+| [VueUse useClipboard](https://github.com/vueuse/vueuse/blob/e32dff3abacaf6aa531dbbbd617fb21b697b7104/packages/core/useClipboard/index.ts) | 22398 stars，MIT，仓库 2026-10-27 有推送；该模块 2026-09-02 有提交。[#5535](https://github.com/vueuse/vueuse/issues/5535#issuecomment-5002004650) 有成员回复，[#5613](https://github.com/vueuse/vueuse/pull/5613) 由 antfu 合并处理，证明问题仍有响应。历史 [#1639](https://github.com/vueuse/vueuse/issues/1639) 提醒 API 不可用时不能假定成功。 | 检测 API、调用异步读取、捕获失败；依赖 Vue、共享工具、权限与事件封装。旧式读取回退是当前选择的文字，不能当作系统剪贴板。 | 借鉴能力检测和失败处理，不引入 Vue。为兼容 Safari，不照搬权限预查询与选择文字回退。 |
+| [clipboard.js](https://github.com/zenorocha/clipboard.js) | 34095 stars，MIT，2026-02-12 有维护提交；[#875](https://github.com/zenorocha/clipboard.js/issues/875) 提出 execCommand 弃用问题，但评论仅查到 stale 机器人，没有核实到人工响应。 | 事件委托、选择文本、复制/剪切；依赖 good-listener、select、tiny-emitter。 | 没有设备剪贴板读取能力，且人工响应不足以确认，不保留为采用候选。 |
 | [clipboard-polyfill](https://github.com/lgarron/clipboard-polyfill) | 925 stars，最后推送 2025-11；本次仓库 API 未识别许可证。 | 兼容多种旧剪贴板接口；README 说明多数现代浏览器不再需要该库，旧读取兼容也有缺口。 | 未满足近期维护和明确许可的筛选要求，排除，不采用。 |
 
 ## 本项目做法
