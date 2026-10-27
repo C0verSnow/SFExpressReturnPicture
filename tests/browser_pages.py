@@ -13,7 +13,7 @@ from clipboard_checks import check_clipboard
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / 'pages-site'
 OUT = ROOT / 'pages-check'
-OUT.mkdir()
+OUT.mkdir(exist_ok=True)
 server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(SimpleHTTPRequestHandler, directory=str(SITE)))
 thread = threading.Thread(target=server.serve_forever, daemon=True)
 thread.start()

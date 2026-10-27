@@ -42,6 +42,7 @@ def check_addresses(page):
 
 
 def run():
+    OUT.mkdir(exist_ok=True)
     failures = []
     with sync_playwright() as p:
         browser = p.chromium.launch()
