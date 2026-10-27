@@ -29,15 +29,16 @@ try:
         page.wait_for_function("!document.getElementById('edit-address').disabled")
         assert page.title() == '退货退款详情 · 收件信息编辑'
         assert page.evaluate("document.fonts.check('48px Address', '新商家')")
-        for filename in ('full-page.js', 'address-dialog.svg', 'NotoSansCJKsc-Regular.otf', 'OFL.txt', 'address.json'):
+        for filename in ('full-page.js', 'address-dialog.svg', 'NotoSansCJKsc-Regular.otf', 'OFL.txt', 'regions-LICENSE.txt', 'address.json'):
             response = page.request.get(base + '/' + filename)
             assert response.status == 200, filename
             assert response.body() == (SITE / filename).read_bytes(), filename
         assert page.request.get(base + '/404.html').status == 200
         page.locator('#edit-address').click()
-        page.locator('#merchant-input').fill('新商家')
-        page.locator('#phone-input').fill('13800138000')
-        page.locator('#address-input').fill('上海市\n浦东新区\n新地址 100 号')
+        page.locator('#paste-input').fill('收件人：新商家\n电话：13800138000\n地址：上海市浦东新区新地址100号')
+        assert page.locator('#merchant-input').input_value() == '新商家'
+        assert page.locator('#phone-input').input_value() == '13800138000'
+        assert ''.join(page.locator('#address-input').input_value().split('\n')) == '上海市上海市浦东新区新地址100号'
         with page.expect_download() as pending:
             page.locator('#confirm').click()
         pending.value.save_as(OUT / 'edited.png')

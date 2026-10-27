@@ -44,11 +44,13 @@ def export_page(config, output_dir):
     # Escape JSON for an HTML script element, including malicious closing tags.
     state = json.dumps(data, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
     template = (ROOT / 'templates/full-page.html').read_text(encoding='utf-8')
-    replacements = {'PHOTO': photo, 'FONT': font, 'STATE': state,
+    regions = (ROOT / 'assets/regions/list.json').read_text(encoding='utf-8')
+    replacements = {'PHOTO': photo, 'FONT': font, 'STATE': state, 'REGIONS': regions,
+                    'REGION_LICENSE': (ROOT / 'assets/regions/LICENSE').read_text(encoding='utf-8'),
                     'SCRIPT': (ROOT / 'templates/full-page.js').read_text(encoding='utf-8')}
     # A single pass prevents user data from being interpreted as placeholders.
     import re
-    page = re.sub(r'@@(PHOTO|FONT|STATE|SCRIPT)@@',
+    page = re.sub(r'@@(PHOTO|FONT|STATE|SCRIPT|REGIONS|REGION_LICENSE)@@',
                   lambda match: replacements[match.group(1)], template)
     target.mkdir(parents=True)
     (target / 'return-page.html').write_text(page, encoding='utf-8')
@@ -57,6 +59,7 @@ def export_page(config, output_dir):
     shutil.copyfile(ROOT / 'docs/address-dialog.svg', target / 'address-dialog.svg')
     shutil.copyfile(ROOT / 'assets/fonts/NotoSansCJKsc-Regular.otf', target / 'NotoSansCJKsc-Regular.otf')
     shutil.copyfile(ROOT / 'assets/fonts/OFL.txt', target / 'OFL.txt')
+    shutil.copyfile(ROOT / 'assets/regions/LICENSE', target / 'regions-LICENSE.txt')
     return target / 'return-page.html'
 
 

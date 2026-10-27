@@ -50,10 +50,37 @@ with sync_playwright() as p:
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('download', lambda download: downloads.append(download))
     page.on('request', lambda request: requests.append(request.url) if request.url.startswith(('http:', 'https:')) else None)
+    # Hold image decoding so the initial loading state is observable.
+    page.add_init_script('''(() => {
+      window.rawImageFrames = [];
+      function watch() {
+        const source = document.getElementById('source');
+        if (source) {
+          const style = getComputedStyle(source);
+          if (style.display !== 'none' && style.visibility !== 'hidden') {
+            window.rawImageFrames.push(performance.now());
+          }
+        }
+        requestAnimationFrame(watch);
+      }
+      requestAnimationFrame(watch);
+      const decode = HTMLImageElement.prototype.decode;
+      HTMLImageElement.prototype.decode = function() {
+        HTMLImageElement.prototype.decode = decode;
+        return new Promise(resolve => { window.releaseImageDecode = resolve; })
+          .then(() => decode.call(this));
+      };
+    })();''')
     page.goto((OUT / 'return-page.html').as_uri())
+    page.wait_for_function('window.releaseImageDecode !== undefined')
+    assert not page.locator('#source').is_visible()
+    assert not page.locator('#rendered-photo').is_visible()
+    page.evaluate('window.releaseImageDecode()')
     page.wait_for_function("!document.getElementById('edit-address').disabled")
     assert page.locator('#tools button').count() == 1
     assert page.locator('#license, #save, #save-json').count() == 0
+    assert page.locator('#rendered-photo').is_visible()
+    assert not page.locator('#source').is_visible()
     initial = pixels(page, 'initial.png')
     with Image.open(ROOT / '2026-10-06 11.08.30.jpg') as source:
         reference = ImageCms.profileToProfile(source.convert('RGB'),
@@ -66,6 +93,52 @@ with sync_playwright() as p:
     assert page.locator('#phone-input').input_value() == '18888888888'
     assert page.locator('#address-input').input_value() == '广东省\n深圳市\n南山区人才公园'
     page.screenshot(path=str(OUT / 'dialog.png'))
+    samples = [
+        ('收货人:Howard\n手机号码:18519079788\n地址信息: 北京 北京市 通州区 宋庄镇 北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院',
+         'Howard', '18519079788', '北京市北京市通州区宋庄镇北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院'),
+        ('收件人：张三\n电话：13800138000\n地址：广东省深圳市南山区科技园',
+         '张三', '13800138000', '广东省深圳市南山区科技园'),
+        ('张三 13800138000 广东 深圳 南山 科技园1号',
+         '张三', '13800138000', '广东省深圳市南山区科技园1号'),
+        ('收件人：张三\n电话：+86 138-0013-8000\n地址：深圳市南山区科技园1号',
+         '张三', '13800138000', '广东省深圳市南山区科技园1号'),
+        ('地址：北京市通州区宋庄镇1号\n收件人：Howard\n手机号：18519079788',
+         'Howard', '18519079788', '北京市北京市通州区宋庄镇1号'),
+        ('上海市浦东新区新地址100号，13800138000，张三',
+         '张三', '13800138000', '上海市上海市浦东新区新地址100号'),
+        ('收货人：张三；手机号码：13800138000；地址：天津和平区南京路1号',
+         '张三', '13800138000', '天津市天津市和平区南京路1号'),
+        ('收货人：张三\n手机号码：13800138000\n地址：重庆市渝中区解放碑1号',
+         '张三', '13800138000', '重庆市重庆市渝中区解放碑1号'),
+        ('收件人：张三\n电话：13800138000\n地址：广西南宁青秀区民族大道1号',
+         '张三', '13800138000', '广西壮族自治区南宁市青秀区民族大道1号'),
+    ]
+    for text, name, phone, address in samples:
+        # Filling triggers the same input event as pasting; no parse-button click is needed.
+        page.locator('#paste-input').fill(text)
+        assert page.locator('#merchant-input').input_value() == name
+        assert page.locator('#phone-input').input_value() == phone
+        lines = page.locator('#address-input').input_value().split('\n')
+        assert len(lines) == 3 and all(lines)
+        assert ''.join(lines) == address, (text, lines)
+        assert page.locator('#parse-status').text_content().startswith('解析完成')
+        assert page.locator('#error').text_content() == ''
+        assert not downloads, 'Parsing must wait for confirmation before downloading'
+    page.locator('#parse-address').click()
+    page.screenshot(path=str(OUT / 'parsed-dialog.png'))
+    unchanged = [page.locator(selector).input_value() for selector in
+                 ('#merchant-input', '#phone-input', '#address-input')]
+    for text in ('信息不完整', '张三 1380013800 北京市通州区宋庄镇',
+                 '张三 138001380000 北京市通州区宋庄镇',
+                 '收件人：张三 电话：13800138000 地址：鼓楼区中山路1号',
+                 '收件人：张三 电话：13800138000 地址：广东省北京市通州区1号',
+                 '收件人：张三 电话：13800138000 地址：广东省深圳市南山区' + '长' * 100,
+                 '收件人：张三 电话：13800138000 13900139000 地址：北京市通州区1号'):
+        page.locator('#paste-input').fill(text)
+        assert page.locator('#error').text_content()
+        assert [page.locator(selector).input_value() for selector in
+                ('#merchant-input', '#phone-input', '#address-input')] == unchanged
+        assert not downloads
     page.locator('#merchant-input').fill('取消名字')
     page.locator('#cancel').click()
     assert pixels(page, 'cancelled.png').read_bytes() == initial.read_bytes()
@@ -75,6 +148,19 @@ with sync_playwright() as p:
     page.keyboard.press('Escape')
     assert not page.locator('#editor').is_visible()
     assert not downloads
+    page.locator('#edit-address').click()
+    page.locator('#paste-input').fill(samples[0][0])
+    confirm(page, OUT / 'parsed-photo.png')
+    assert json.loads(page.locator('#address-state').text_content())['merchant'] == 'Howard'
+    assert page.locator('#source').is_hidden()
+    page.locator('#edit-address').click()
+    page.locator('#merchant-input').fill(DEFAULT['merchant'])
+    page.locator('#phone-input').fill(DEFAULT['phone'])
+    page.locator('#address-input').fill('\n'.join(DEFAULT['lines']))
+    confirm(page, OUT / 'parsed-reset.png')
+    with Image.open(initial) as first, Image.open(OUT / 'parsed-reset.png') as restored:
+        assert ImageChops.difference(first.convert('RGB'), restored.convert('RGB')).getbbox() is None, 'Restoring parsed fields changed default pixels'
+    downloads.clear()
     page.locator('#edit-address').click()
     for selector, text in [('#merchant-input', '名' * 20), ('#phone-input', '1' * 40),
                            ('#address-input', '一\n二\n三\n四'), ('#address-input', '一\n二'),
@@ -111,6 +197,8 @@ with sync_playwright() as p:
         page.locator('#save-photo').click()
     pending.value.save_as(OUT / 'saved-again.png')
     assert (OUT / 'saved-again.png').read_bytes() == (OUT / 'confirmed-photo.png').read_bytes()
+    assert not page.locator('#source').is_visible()
+    assert page.locator('#rendered-photo').is_visible()
     page.locator('#edit-address').click()
     page.locator('#address-input').fill('</script><img src=x>\n第二行\n第三行')
     confirm(page, OUT / 'escaped-photo.png')
@@ -123,6 +211,8 @@ with sync_playwright() as p:
     confirm(page, OUT / 'restored.png')
     with Image.open(OUT / 'original.png') as original, Image.open(OUT / 'restored.png') as restored:
         assert ImageChops.difference(original, restored.convert('RGB')).getbbox() is None
+    assert not page.locator('#source').is_visible()
+    assert page.locator('#rendered-photo').is_visible()
     # Classify device hints, resize across categories, and inspect every recommended canvas.
     for platform, width, height, touch in [('desktop', 1920, 1080, False), ('laptop', 1440, 900, False),
                                          ('tablet', 768, 1024, True), ('mobile', 390, 844, True)]:
@@ -154,6 +244,17 @@ with sync_playwright() as p:
             view.wait_for_function("document.documentElement.dataset.platform === 'mobile'")
             assert view.evaluate('document.documentElement.scrollWidth <= innerWidth')
         device.close()
+    failed = context.new_page()
+    failed.add_init_script("HTMLImageElement.prototype.decode = () => Promise.reject(new Error('decode failed'))")
+    failed.goto((OUT / 'return-page.html').as_uri())
+    failed.wait_for_function("document.getElementById('status').textContent.includes('未能加载')")
+    assert failed.locator('#source').is_hidden()
+    assert failed.locator('#rendered-photo').is_hidden()
+    assert failed.locator('#loading').is_visible()
+    assert failed.locator('#edit-address').is_disabled()
+    assert failed.locator('#save-photo').is_disabled()
+    failed.close()
+    assert page.evaluate('window.rawImageFrames.length') == 0, 'Raw image exposed during loading or download'
     assert not errors, errors
     assert not requests, requests
     browser.close()
