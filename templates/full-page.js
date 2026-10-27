@@ -168,7 +168,7 @@
     get('parse-status').textContent = '';
     try {
       const parsed = parseContact(get('paste-input').value);
-      const ctx = document.createElement('canvas').getContext('2d');
+      const ctx = document.createElement('canvas').getContext('2d', {alpha: false, willReadFrequently: true});
       font(ctx);
       const lines = splitAddress(parsed.address, ctx, fields.lines.width);
       if (!lines) throw new Error('地址太长或太短，无法放进三行，请手动调整；原填写内容已保留。');
@@ -214,7 +214,7 @@
       if (data.lines.length !== 3 || data.lines.some(line => !line)) {
         get('error').textContent = '地址请写满三行，每行都要填写。'; return;
       }
-      const ctx = document.createElement('canvas').getContext('2d');
+      const ctx = document.createElement('canvas').getContext('2d', {alpha: false, willReadFrequently: true});
       font(ctx);
       for (const [key, field] of Object.entries(fields)) {
         const values = key === 'lines' ? data.lines : [data[key]];

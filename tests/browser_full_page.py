@@ -125,6 +125,7 @@ with sync_playwright() as p:
         assert page.locator('#error').text_content() == ''
         assert not downloads, 'Parsing must wait for confirmation before downloading'
     page.locator('#parse-address').click()
+    page.screenshot(path=str(OUT / 'parsed-dialog.png'))
     unchanged = [page.locator(selector).input_value() for selector in
                  ('#merchant-input', '#phone-input', '#address-input')]
     for text in ('信息不完整', '张三 1380013800 北京市通州区宋庄镇',
@@ -138,7 +139,6 @@ with sync_playwright() as p:
         assert [page.locator(selector).input_value() for selector in
                 ('#merchant-input', '#phone-input', '#address-input')] == unchanged
         assert not downloads
-    page.screenshot(path=str(OUT / 'parsed-dialog.png'))
     page.locator('#merchant-input').fill('取消名字')
     page.locator('#cancel').click()
     assert pixels(page, 'cancelled.png').read_bytes() == initial.read_bytes()
@@ -158,6 +158,8 @@ with sync_playwright() as p:
     page.locator('#phone-input').fill(DEFAULT['phone'])
     page.locator('#address-input').fill('\n'.join(DEFAULT['lines']))
     confirm(page, OUT / 'parsed-reset.png')
+    with Image.open(initial) as first, Image.open(OUT / 'parsed-reset.png') as restored:
+        assert ImageChops.difference(first, restored.convert('RGB')).getbbox() is None, 'Restoring parsed fields changed default pixels'
     downloads.clear()
     page.locator('#edit-address').click()
     for selector, text in [('#merchant-input', '名' * 20), ('#phone-input', '1' * 40),
