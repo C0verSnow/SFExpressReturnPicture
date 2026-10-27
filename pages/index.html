@@ -7,7 +7,7 @@
 *{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#252832;font-family:system-ui,-apple-system,sans-serif}
 #workspace{width:min(100%,var(--preview-width));margin:auto;padding:20px 12px 0}
 #page{position:relative;width:100%;aspect-ratio:1182/2560;overflow:hidden;border-radius:18px;box-shadow:0 8px 32px #20293812;background:white}
-#source,#rendered-photo{display:block;width:100%;height:100%}#rendered-photo{position:absolute;inset:0;pointer-events:none}#rendered-photo[hidden]{display:none}
+#source{display:none}#rendered-photo{display:block;width:100%;height:100%;position:absolute;inset:0;pointer-events:none}#rendered-photo[hidden]{display:none}
 #edit-address{position:absolute;z-index:1;left:6.9374%;top:63.90625%;width:86.1252%;height:18.320313%;border:0;border-radius:12px;background:transparent;cursor:pointer}
 #edit-address span{position:absolute;right:3%;top:2%;display:flex;align-items:center;gap:4px;padding:3px 7px;border-radius:20px;background:#fff;color:#b93228;font:600 10px system-ui;box-shadow:0 2px 8px #0001}
 #edit-address svg{width:12px;height:12px}
@@ -73,9 +73,6 @@ html[data-platform="laptop"]{--preview-width:380px}html[data-platform="tablet"]{
     ctx.letterSpacing = '-0.5px';
     ctx.textBaseline = 'alphabetic';
   }
-  function changed(data) {
-    return Object.keys(fields).some(key => JSON.stringify(data[key]) !== JSON.stringify(original[key]));
-  }
   async function photo(data) {
     await document.fonts.load('48px Address');
     await document.fonts.ready;
@@ -100,7 +97,7 @@ html[data-platform="laptop"]{--preview-width:380px}html[data-platform="tablet"]{
   function render(canvas, blob) {
     currentPNG = blob;
     get('rendered-photo').getContext('2d').drawImage(canvas, 0, 0);
-    get('rendered-photo').hidden = !changed(state);
+    get('rendered-photo').hidden = false;
     get('rendered-photo').setAttribute('aria-label', `${state.merchant} ${state.phone} ${state.lines.join(' ')}`);
     get('address-state').textContent = JSON.stringify(state).replace(/</g, '\\u003c');
   }
