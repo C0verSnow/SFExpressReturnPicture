@@ -13,6 +13,14 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- [1793120718] C0verSnow issue #7 已完成：PR #8 已按用户授权合并到 main，合并提交 a6c1b0c6fc769c49765979435b5c80e71bb6330a；GitHub 已自动关闭 issue #7，并确认状态为 closed：https://github.com/C0verSnow/SFExpressReturnPicture/pull/8 。
+- [1793120718] 最终功能提交 cff11cd 的 push 和 PR 两份远端工作流全部通过：Python 3.10、3.13、真实剪贴板、异常回退、在线离线、四类屏幕、PNG 像素、防闪现及 pages/ 逐文件一致性：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40545937150 和 https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40545947545 。
+- [1793120718] 已查看远端弹窗与手机截图，新按钮和深圳示例显示正常；README、模板、远端测试、GitHub 候选比较和远端生成的发布文件均已合并。已在 GitHub 检索并比较 VueUse、clipboard.js、clipboard-polyfill，仅借鉴能力检测与失败处理设计，没有引入依赖或复制代码。
+- [1793120718] 本地没有构建、编译、生成或运行项目测试；只做代码阅读、编辑、静态语法解析、差异与文件校验，并查看远端图片。本次最后只补充完成记录，使用 skip ci 避免重复跑同一份功能代码。
+- [1793120220] 用户已明确授权：最终检查全过后由我合并 PR #8，再关闭 issue #7。远端发布附件正在下载，连接正常；本地不生成或运行验证。
+- [1793119822] 远端 Python 两版本通过；已查看 GitHub 实时日志，浏览器仍在下载 Ubuntu 的 Playwright 系统依赖，尚未执行功能检查。没有在本地安装依赖或运行验证。
+- [1793119572] 已推送 feature/issue-7-paste-and-parse，创建草稿 PR #8：https://github.com/C0verSnow/SFExpressReturnPicture/pull/8 。远端 Python 3.10、3.13 已通过，等浏览器检查和远端发布附件；本地不运行生成或验证。
+- [1793119277] 已读取 issue #7 正文和全部三条评论，同步 origin/main 并创建 feature/issue-7-paste-and-parse；用户确认示例号码使用 11 位 18888888888。本地只读代码、编辑与静态检查，验证走远端 CI。
 - [1793120229] 已从远端 CI 附件取回 pages/ 全部九个文件并核对压缩包 SHA-256；部署 JS 与模板完全一致。没有在本地生成网页，准备推送最终发布目录一致性检查。
 - [1793120027] 第一轮远端功能与浏览器检查通过（真实剪贴板、HTTP、离线、四类屏幕、PNG 像素、防闪现及旧地址页），Python 3.10、3.13 通过：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40543901324 。此轮仅发布目录一致性检查因旧 pages/index.html、full-page.js 失败，正在取回远端生成附件更新；未放宽检查。
 - [1793119461] issue #7 已实现一键读取、覆盖和自动解析，以及空剪贴板、读取失败、手动回退和旧请求失效处理；已补在线、离线、四类屏幕和真实剪贴板远端检查，更新 README 与 GitHub 候选比较。本地只通过静态语法解析与差异检查，未运行生成、测试或编译。
@@ -94,14 +102,12 @@
 - [1793101901] 已在 GitHub 检索地址解析项目；正在比较维护情况、许可证和行政区划设计；本地不运行构建、生成验证或测试。
 
 ## 没做：
+- [1793120718] 本次没有实体 iPhone Safari、安卓系统授权测试，没有操作 Cloudflare 后台；浏览器授权限制与手动粘贴方式已在 README 说明。
 - [1793102973] 当前 PR #6 尚未合并；本次没有操作 Cloudflare 生产部署。
 - 本次 PR #4 尚未合并，issue #3 等合并后自动关闭；未连接 Cloudflare 账号或部署真实 pages.dev 域名。历史 PR #2 已合并。
 - PR #8 尚未合并，留给用户审阅；PR #4 和 PR #6 已合并到 main。
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
-- [1793120220] 用户已明确授权：最终检查全过后由我合并 PR #8，再关闭 issue #7。远端发布附件正在下载，连接正常；本地不生成或运行验证。
-- [1793119822] 远端 Python 两版本通过；已查看 GitHub 实时日志，浏览器仍在下载 Ubuntu 的 Playwright 系统依赖，尚未执行功能检查。没有在本地安装依赖或运行验证。
-- [1793119572] 已推送 feature/issue-7-paste-and-parse，创建草稿 PR #8：https://github.com/C0verSnow/SFExpressReturnPicture/pull/8 。远端 Python 3.10、3.13 已通过，等浏览器检查和远端发布附件；本地不运行生成或验证。
-- [1793119277] 已读取 issue #7 正文和全部三条评论，同步 origin/main 并创建 feature/issue-7-paste-and-parse；用户确认示例号码使用 11 位 18888888888。本地只读代码、编辑与静态检查，验证走远端 CI。
+- [1793120718] 当前 C0verSnow issue #7 的实现、文档、发布文件、远端验证、PR 合并和 issue 关闭均已完成，没有剩余事项。
 - [1793102973] issue #5 的代码、文档、发布文件和远端验证均已完成；没有未完成的实现事项。
