@@ -54,6 +54,7 @@ with sync_playwright() as p:
     page.add_init_script('''(() => {
       const decode = HTMLImageElement.prototype.decode;
       HTMLImageElement.prototype.decode = function() {
+        HTMLImageElement.prototype.decode = decode;
         return new Promise(resolve => { window.releaseImageDecode = resolve; })
           .then(() => decode.call(this));
       };
@@ -80,6 +81,20 @@ with sync_playwright() as p:
     assert page.locator('#phone-input').input_value() == '18888888888'
     assert page.locator('#address-input').input_value() == '广东省\n深圳市\n南山区人才公园'
     page.screenshot(path=str(OUT / 'dialog.png'))
+    page.locator('#paste-input').fill('收货人:Howard\n手机号码:18519079788\n地址信息: 北京 北京市 通州区 宋庄镇 北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院')
+    page.locator('#parse-address').click()
+    assert page.locator('#merchant-input').input_value() == 'Howard'
+    assert page.locator('#phone-input').input_value() == '18519079788'
+    lines = page.locator('#address-input').input_value().split('\n')
+    assert len(lines) == 3 and all(lines)
+    assert ''.join(lines).startswith('北京市北京市通州区')
+    page.locator('#paste-input').fill('收件人：张三\n电话：13800138000\n地址：广东省深圳市南山区科技园')
+    page.locator('#parse-address').click()
+    assert ''.join(page.locator('#address-input').input_value().split('\n')) == '广东省深圳市南山区科技园'
+    page.locator('#paste-input').fill('信息不完整')
+    page.locator('#parse-address').click()
+    assert '没能识别' in page.locator('#error').text_content()
+    assert page.locator('#merchant-input').input_value() == '张三'
     page.locator('#merchant-input').fill('取消名字')
     page.locator('#cancel').click()
     assert pixels(page, 'cancelled.png').read_bytes() == initial.read_bytes()

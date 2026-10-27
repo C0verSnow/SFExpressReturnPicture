@@ -72,7 +72,59 @@
     return new Promise((resolve, reject) => canvas.toBlob(blob =>
       blob ? resolve(blob) : reject(new Error('照片生成失败')), 'image/png'));
   }
+  // Extract labelled fields first; keep uncertain results for manual correction.
+  // Parsing approach informed by docs/address-parsing-research.md.
+  function parseContact(text) {
+    const name = text.match(/(?:收货人|收件人|姓名|名字)\s*[:：]\s*([^\s,，;；]+)/);
+    const phone = text.match(/(?<!\d)1[3-9]\d{9}(?!\d)/);
+    const label = text.match(/(?:地址信息|收货地址|收件地址|地址)\s*[:：]\s*([\s\S]*)/);
+    let address = label ? label[1] : text.replace(phone?.[0] || '', '').replace(name?.[0] || '', '');
+    address = address.trim().replace(/\s+/g, '');
+    const municipality = address.match(/^(北京|上海|天津|重庆)(?:市)?/);
+    if (municipality) {
+      const city = municipality[1] + '市';
+      address = address.slice(municipality[0].length);
+      const repeated = new RegExp('^' + municipality[1] + '(?:市)?');
+      address = city + city + address.replace(repeated, '');
+    }
+    const district = address.match(/^(.+?(?:省|自治区|北京市北京市|上海市上海市|天津市天津市|重庆市重庆市))(.+?(?:市|自治州|地区|盟))(.+?(?:区|县|旗|市))/);
+    const municipalDistrict = address.match(/^(北京市北京市|上海市上海市|天津市天津市|重庆市重庆市)(.+?(?:区|县))/);
+    if (!name || !phone || !(district || municipalDistrict)) return null;
+    return {name: name[1], phone: phone[0], address};
+  }
+  function splitAddress(address, ctx, width) {
+    const chars = Array.from(address);
+    if (chars.length < 3) return null;
+    // Balance the lines while checking the actual font width and retaining every character.
+    const lines = [];
+    for (let remaining = 3; remaining > 0; remaining--) {
+      let take = Math.ceil(chars.length / remaining);
+      while (take > 0 && ctx.measureText(chars.slice(0, take).join('')).width > width) take--;
+      if (!take || chars.length - take < remaining - 1) return null;
+      lines.push(chars.splice(0, take).join(''));
+    }
+    return chars.length ? null : lines;
+  }
+  get('parse-address').onclick = async () => {
+    get('error').textContent = '';
+    const parsed = parseContact(get('paste-input').value);
+    if (!parsed) {
+      get('error').textContent = '没能识别完整信息，请写明收件人、手机号和省市区，或手动填写。'; return;
+    }
+    await document.fonts.ready;
+    const ctx = document.createElement('canvas').getContext('2d');
+    font(ctx);
+    const lines = splitAddress(parsed.address, ctx, fields.lines.width);
+    if (!lines) {
+      get('error').textContent = '地址太长或太短，无法放进三行，请手动调整。'; return;
+    }
+    get('merchant-input').value = parsed.name;
+    get('phone-input').value = parsed.phone;
+    get('address-input').value = lines.join('\n');
+    get('error').textContent = '解析完成，请核对姓名、电话和地址。';
+  };
   get('edit-address').onclick = () => {
+    get('paste-input').value = '';
     get('merchant-input').value = state.merchant;
     get('phone-input').value = state.phone;
     get('address-input').value = state.lines.join('\n').replace(/\n+$/, '');
