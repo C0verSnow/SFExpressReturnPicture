@@ -159,7 +159,7 @@ with sync_playwright() as p:
     page.locator('#address-input').fill('\n'.join(DEFAULT['lines']))
     confirm(page, OUT / 'parsed-reset.png')
     with Image.open(initial) as first, Image.open(OUT / 'parsed-reset.png') as restored:
-        assert ImageChops.difference(first, restored.convert('RGB')).getbbox() is None, 'Restoring parsed fields changed default pixels'
+        assert ImageChops.difference(first.convert('RGB'), restored.convert('RGB')).getbbox() is None, 'Restoring parsed fields changed default pixels'
     downloads.clear()
     page.locator('#edit-address').click()
     for selector, text in [('#merchant-input', '名' * 20), ('#phone-input', '1' * 40),
