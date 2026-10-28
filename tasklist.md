@@ -15,6 +15,7 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- [1793167010] 已先推送 578a488 红回归；远端 node tests/address_core.cjs 共 19 组、8 组失败，Howard 实际少一份北京市，浏览器 verify 也复现；Python 3.10/3.13 原测试通过。运行：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40640724727 。GitHub 已检索到 smartParsePro 和 data_location 的相关设计，比较记录到 docs/issue-11-research.md。
 - [1793123157] issue #9 已完成交付：PR #10 已从草稿改为可审阅，保持 open、未合并，等用户 review；按 issue 正文要求已关闭 #9，并确认状态为 closed。最终功能和发布提交 550a70f 的 push/PR 远端检查全部通过：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40553315051 和 https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40553327089 。
 - [1793123157] 已更新模板、测试、README、GitHub 候选项目比较及远端生成的 pages/。GitHub 查到了 smartParsePro（ISC）与 data_location（MIT）的相关设计，已记录链接，没有复制解析器代码或新增依赖。本地未构建、编译、生成或运行项目测试，只做静态检查和查看远端附件。
 - [1793123011] 已从远端附件取回全部九个 pages/ 文件，核对 ZIP SHA-256 和文件清单，发布 JS 与模板完全相同；本地没有生成网页。实际变更是 index.html 与 full-page.js，准备推送最终发布一致性检查。
@@ -119,6 +120,8 @@
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
+- [1793167158] 已完成纯地址模块提取和三级输出修复，补 29 组纯逻辑及浏览器安全回归；只清明确重复路径，孤立同名区县词保留，县简称连写不可靠时提示手填。Python 静态语法及差异检查通过；本机没有 Node，未进行 JS 运行验证，准备交远端 CI。
+- [1793167075] Python 业务、模板和地区数据已迁到 src/sf_return，五个根入口保留；静态核对确认原地区数据/许可及未改模板逐字节一致，字体、截图、配置没动。正在修复直辖市层级输出与保守前缀处理，远端生成 pages 后再提交发布快照。
 - [1793166877] 已记录目录、兼容入口、读写路径、CLI、测试和九个 Pages 文件基线到 docs/issue-11-plan.md；正在先补完整地址与歧义回归，并并行核对 GitHub 参考设计。
 - [1793166771] 已读取 issue 正文及两条评论，git fetch 后从最新 origin/main（0db6de6）创建 feature/issue-11-engineering-address；原工作区干净，旧分支独有提交保留。本地不编译、不生成、不跑项目测试。
 - [1793123157] issue #9 没有剩余实现事项，PR #10 等用户审阅；本次最后只补完成记录，功能和发布文件与已通过远端检查的 550a70f 一致。
