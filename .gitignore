@@ -7,3 +7,14 @@ sample-output/
 offline-return-page/
 pages-site/
 pages-check/
+
+# Local credentials and editor/packaging caches; pages/ is a committed release snapshot.
+.env
+.env.*
+!.env.example
+.DS_Store
+.pytest_cache/
+node_modules/
+*.egg-info/
+build/
+dist/

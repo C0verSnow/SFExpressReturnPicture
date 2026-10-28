@@ -2,28 +2,11 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const vm = require('node:vm');
 const {test} = require('node:test');
 const root = path.resolve(__dirname, '..');
-const modulePath = path.join(root, 'src/sf_return/address/contact.js');
-const dataPath = fs.existsSync(path.join(root, 'src/sf_return/address/data/list.json'))
-  ? path.join(root, 'src/sf_return/address/data/list.json')
-  : path.join(root, 'assets/regions/list.json');
-const regions = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-let api;
-if (fs.existsSync(modulePath)) {
-  const core = require(modulePath);
-  api = {...core, ...core.createParser(regions)};
-} else {
-  // Baseline-only adapter: run the actual pre-extraction functions to prove red.
-  // Remove this adapter once the pure module is extracted; no duplicate parser.
-  const source = fs.readFileSync(path.join(root, 'templates/full-page.js'), 'utf8');
-  const start = source.indexOf('  const municipalities =');
-  const end = source.indexOf('  function parsePastedContact()');
-  assert.ok(start >= 0 && end > start, 'Legacy parser seam must be present');
-  api = vm.runInNewContext(source.slice(start, end) +
-    '\n({parseContact, parseRegion, splitAddress, fitAddress})', {regions});
-}
+const core = require('../src/sf_return/address/contact.js');
+const regions = JSON.parse(fs.readFileSync(path.join(root, 'src/sf_return/address/data/list.json'), 'utf8'));
+const api = {...core, ...core.createParser(regions)};
 const cases = [
   ['Howard repeat', '北京 北京市 通州区 宋庄镇 北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院',
     '北京市北京市通州区宋庄镇宋庄南路北京工商大学嘉华学院'],
@@ -41,6 +24,10 @@ const cases = [
   ['Repeated town', '广东省深圳市南山区粤海街道粤海街道科技园1号', '广东省深圳市南山区粤海街道科技园1号'],
   ['Names in detail', '广东省深圳市南山区南山大道北京银行南山学校1号楼', '广东省深圳市南山区南山大道北京银行南山学校1号楼'],
   ['Beijing school', '北京市通州区宋庄南路北京工商大学嘉华学院', '北京市北京市通州区宋庄南路北京工商大学嘉华学院'],
+  ['Foreign place at detail start', '广东省深圳市南山区北京市实验学校1号', '广东省深圳市南山区北京市实验学校1号'],
+  ['County school at detail start', '北京市通州区通州区实验学校1号', '北京市北京市通州区通州区实验学校1号'],
+  ['County road at detail start', '广东省深圳市南山区南山区大道1号', '广东省深圳市南山区南山区大道1号'],
+  ['Administrative levels without detail', '广东省深圳市南山区', '广东省深圳市南山区'],
   ['Keep notes', '广东省深圳市南山区科技园（东门）1号', '广东省深圳市南山区科技园（东门）1号'],
 ];
 for (const [label, input, expected] of cases) {
@@ -58,10 +45,16 @@ for (const [label, input, expected] of cases) {
     assert.equal(laidOut.omitted.length, 0);
   });
 }
-test('Incomplete, conflicting and ambiguous regions require manual correction', () => {
-  for (const address of ['鼓楼区中山路1号', '广东省北京市通州区1号', '广东省深圳市科技园1号', '海南省文昌市文城镇1号']) {
+for (const address of ['鼓楼区中山路1号', '广东省北京市通州区1号', '广东省深圳市科技园1号',
+  '海南省文昌市文城镇1号', '广东省深圳市南山大道1号', '广东省深圳市南山科技园1号']) {
+  test('Uncertain hierarchy requires manual correction: ' + address, () => {
     assert.throws(() => api.parseContact('张三 13800138000 ' + address), /省市区|同名地区/);
-  }
+  });
+}
+test('Municipality fields represent distinct administrative levels', () => {
+  const result = api.normalizeRegion('北京 通州区 通州区实验学校1号');
+  assert.deepEqual(result, {province: '北京市', city: '北京市', county: '通州区',
+    detail: '通州区实验学校1号', address: '北京市北京市通州区通州区实验学校1号'});
 });
 test('Phone normalization and labels remain compatible', () => {
   const result = api.parseContact('地址：深圳市南山区科技园1号；电话：+86 138-0013-8000；收件人：张三');
