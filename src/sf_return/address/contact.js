@@ -40,32 +40,40 @@
         ? [path.province + path.city + path.county, path.province + path.county]
         : [path.province + path.city + path.county, path.city + path.county];
     }
-    function stripRepeatedPath(detail, prefixes) {
+    function skipRepeatedPath(text, offset, prefixes) {
       let match;
-      while ((match = prefixes.find(prefix => detail.startsWith(prefix)))) {
-        detail = detail.slice(match.length);
+      while ((match = prefixes.find(prefix => text.startsWith(prefix, offset)))) {
+        offset += match.length;
       }
-      return detail;
+      return offset;
     }
-    function normalizeDetail(detail, path) {
+    function isSeparateField(text, offset, name, boundaries) {
+      return boundaries.has(offset)
+        && (boundaries.has(offset + name.length) || offset + name.length === text.length);
+    }
+    function normalizeDetail(text, offset, path, boundaries) {
       const prefixes = repeatedPaths(path);
-      let rest = stripRepeatedPath(detail, prefixes);
-      const town = rest.match(/^([\p{Script=Han}]{1,12}?(?:街道|镇|乡|苏木))/u)?.[0];
-      if (!town) return rest;
-      rest = rest.slice(town.length);
+      const start = skipRepeatedPath(text, offset, prefixes);
+      const town = text.slice(start).match(/^([\p{Script=Han}]{1,12}?(?:街道|镇|乡|苏木))/u)?.[0];
+      if (!town) return text.slice(start);
+      let cursor = start + town.length;
       while (true) {
-        const next = stripRepeatedPath(rest, prefixes);
-        if (next.startsWith(town)) rest = next.slice(town.length);
-        else if (next !== rest) rest = next;
+        const next = skipRepeatedPath(text, cursor, prefixes);
+        // A repeated full path, or a separately delimited repeated field,
+        // establishes duplication. A school may itself start with 宋庄镇.
+        if (text.startsWith(town, next)
+            && (next !== cursor || isSeparateField(text, next, town, boundaries))) {
+          cursor = next + town.length;
+        } else if (next !== cursor) cursor = next;
         else break;
       }
-      return town + rest;
+      return town + text.slice(cursor);
     }
     function normalizeRegion(address) {
       const {text, boundaries} = compactAddress(address);
       const candidates = [];
       for (const path of paths) {
-        let offset = 0, score = 0, repeatedAncestor = false, hasCounty = false;
+        let offset = 0, score = 0, hasCounty = false;
         const levels = [path.province, path.city, path.county];
         for (let level = 0; level < levels.length; level++) {
           const name = levels[level];
@@ -79,22 +87,18 @@
           score += match.length;
           if (level === 2) {
             hasCounty = true;
-            // Repeated ancestor fields establish a repeated hierarchy chain.
-            // A lone repeated county in detail is ambiguous, so preserve it.
-            if (repeatedAncestor) {
-              while (text.startsWith(name, offset)) {
-                offset += name.length; score += name.length;
-              }
+            // A lone concatenated county may belong to a school name. Only
+            // remove an additional county when it is a separate input field.
+            while (text.startsWith(name, offset) && isSeparateField(text, offset, name, boundaries)) {
+              offset += name.length; score += name.length;
             }
           } else {
-            let count = 1;
             while (text.startsWith(name, offset)) {
-              offset += name.length; score += name.length; count++;
+              offset += name.length; score += name.length;
             }
-            if (count > (path.province === path.city ? 2 : 1)) repeatedAncestor = true;
           }
         }
-        if (hasCounty) candidates.push({...path, detail: text.slice(offset), score});
+        if (hasCounty) candidates.push({...path, offset, score});
       }
       candidates.sort((a, b) => b.score - a.score);
       if (!candidates.length) throw new Error('没能识别省市区，请补全地址，或手动填写。');
@@ -102,7 +106,7 @@
         throw new Error('地址有多个同名地区，请补上省、市后重新解析。');
       }
       const path = candidates[0];
-      const detail = normalizeDetail(path.detail, path);
+      const detail = normalizeDetail(text, path.offset, path, boundaries);
       // These are three semantic levels, even when municipality names coincide.
       return {province: path.province, city: path.city, county: path.county, detail,
         address: path.province + path.city + path.county + detail};
