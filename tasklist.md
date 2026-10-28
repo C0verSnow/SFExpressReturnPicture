@@ -15,6 +15,7 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- [1793168036] issue #11 实现、文档、发布快照均完成；c9b0787 的 push/PR 两套远端 CI 全绿，含 34 组地址、两版 Python、全部浏览器及 pages 逐文件一致性：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642366025 和 https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642371842 。PR #12 等人工 Review，保持 issue open；未合并、未部署。GitHub 检索与比较已记录，本地未编译/构建/生成或运行项目测试。
 - [1793167836] 4d70026 的远端功能检查全部通过：34 组地址、Python 3.10/3.13、严格跨设备 PNG、HTTP/离线/剪贴板/主题/旧地址页；仅旧 pages 快照一致性失败。已从该轮附件取回九个发布文件，核对 ZIP SHA-256 和源 JS；本地没有生成网页。运行：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642027019 。
 - [1793167745] 已取回并静态对比 7c1fddf 的远端照片：均为 1182×2560，差异 2467 像素仅在电话数字矩形 (575,1728)-(860,1765)，姓名、地址及其他底图像素完全相同；已查看解析弹窗，布局正常。4d70026 已将跨设备比较的操作历史和浏览器进程对齐，未放宽任何像素标准，等远端结果。
 - [1793167010] 已先推送 578a488 红回归；远端 node tests/address_core.cjs 共 19 组、8 组失败，Howard 实际少一份北京市，浏览器 verify 也复现；Python 3.10/3.13 原测试通过。运行：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40640724727 。GitHub 已检索到 smartParsePro 和 data_location 的相关设计，比较记录到 docs/issue-11-research.md。
@@ -123,6 +124,7 @@
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
+- [1793168036] issue #11 无剩余实现事项；补充最终验收记录后交付 PR #12 等用户 Review，后续反馈继续在当前 feature 分支处理。
 - [1793167885] 源码、文档和远端生成的 pages 发布快照已齐，PR #12 的功能检查已通过；现在提交九文件快照和验证记录，等最终逐文件一致性 CI。实现完成后交给用户 Review，issue #11 保持 open、未合并、未部署。
 - [1793167687] 59b0739 远端 34 组地址、Python 3.10/3.13 均通过；浏览器跨设备照片比较两次失败在不同行为历史的参考图。准备在各设备独立 Chromium 下重放相同操作，保持 PNG 字节完全一致，并额外逐平台检查字段、尺寸及下载与预览 RGBA 全像素；原逐字段和恢复检查全部保留，远端图片仍在取回分析。
 - [1793167268] 已创建草稿 PR #12 等远端验证：https://github.com/C0verSnow/SFExpressReturnPicture/pull/12 。静态复核发现镇名学校和重复省名后的区名学校会被误删，已补回归并改为独立字段边界/完整重复路径证据，连写歧义前缀保留；纯逻辑现 34 组。

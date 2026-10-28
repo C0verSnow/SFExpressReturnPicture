@@ -13,7 +13,7 @@
 - `python workflow.py verify`：HTTP 资源、离线整页和旧地址区、剪贴板、四类屏幕、键盘/取消/失败重试、初始图防闪现、主题和照片像素。
 - 各设备使用同样的解析/编辑步骤、独立 Chromium 进程，下载 PNG 字节完全相同；每个平台固定字段、1182×2560 尺寸、下载与预览全部 RGBA 像素严格相等。原逐字段边界、重复保存和恢复原图检查全部保留。
 
-这两轮 workflow 仅因提交的 `pages/` 仍是旧快照而总体失败，没有跳过或放宽发布比较。已从该轮 `cloudflare-pages-site` artifact 取回全部九个发布文件，ZIP SHA-256 为 `f5162448d0d1665a699454f6c17d2084f8ff8cc0e898492694bcf8907fc68483`。文件名集合核对完整，发布 JS 与纯模块加页面交互源码完全相同。最终提交会再次执行 CI，检查发布目录逐文件一致；最终状态和链接在 [PR #12](https://github.com/C0verSnow/SFExpressReturnPicture/pull/12) 更新。
+这两轮 workflow 仅因提交的 `pages/` 仍是旧快照而总体失败，没有跳过或放宽发布比较。已从该轮 `cloudflare-pages-site` artifact 取回全部九个发布文件，ZIP SHA-256 为 `f5162448d0d1665a699454f6c17d2084f8ff8cc0e898492694bcf8907fc68483`。文件名集合核对完整，发布 JS 与纯模块加页面交互源码完全相同。发布提交 `c9b0787` 的 [push CI](https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642366025) 和 [PR CI](https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642371842) 均已全部通过，包含发布目录逐文件一致性。最后仅补本验收记录和任务清单，功能与发布文件不再变化；最新状态也在 [PR #12](https://github.com/C0verSnow/SFExpressReturnPicture/pull/12) 更新。
 
 ## 浏览器比较的处理
 
