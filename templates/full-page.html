@@ -1,9 +1,12 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="only light">
 <title>退货退款详情 · 收件信息编辑</title>
 <style>
 @font-face{font-family:Address;src:url(data:font/otf;base64,@@FONT@@) format('opentype')}
-:root{color-scheme:light;--preview-width:420px;--accent:#e94335}
+/* Chrome automatic darkening must not recolor the source, preview or photo editor.
+   See https://developer.chrome.com/blog/auto-dark-theme#how_to_opt_out_of_auto_dark_theme */
+:root{color-scheme:only light;--preview-width:420px;--accent:#e94335}
 *{box-sizing:border-box}body{margin:0;background:#f4f5f7;color:#252832;font-family:system-ui,-apple-system,sans-serif}
 #workspace{width:min(100%,var(--preview-width));margin:auto;padding:20px 12px 0}
 #page{position:relative;width:100%;aspect-ratio:1182/2560;overflow:hidden;border-radius:18px;box-shadow:0 8px 32px #20293812;background:white}
@@ -19,8 +22,8 @@
 #save-photo{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border:0;border-radius:15px;background:var(--accent);color:white;font:600 16px system-ui;box-shadow:0 6px 16px #e9433526;cursor:pointer;transition:background .15s,transform .15s}
 #save-photo:hover{background:#d73529}#save-photo:active{transform:translateY(1px)}button:focus-visible{outline:3px solid #247cbb;outline-offset:3px}
 #status{display:block;margin-top:8px;font-size:12px;line-height:1.6;color:#59616e}#status:empty{display:none}
-dialog{max-height:calc(100dvh - 32px);overflow:auto;border:0;border-radius:20px;width:min(520px,calc(100% - 32px));padding:26px;box-shadow:0 12px 60px #0003;font:16px/1.6 system-ui}
-dialog::backdrop{background:#18202b66}h1{margin:0 0 8px;font-size:22px}label{display:block;margin-top:16px;font-weight:600}input,textarea{display:block;width:100%;padding:12px;margin-top:6px;font:16px/1.7 system-ui;border:1px solid #d9dce2;border-radius:10px;background:#fafbfc}textarea{min-height:132px;resize:vertical}
+dialog{max-height:calc(100dvh - 32px);overflow:auto;border:0;border-radius:20px;width:min(520px,calc(100% - 32px));padding:26px;background:#fff;color:#252832;box-shadow:0 12px 60px #0003;font:16px/1.6 system-ui}
+dialog::backdrop{background:#18202b66}h1{margin:0 0 8px;font-size:22px}label{display:block;margin-top:16px;font-weight:600}input,textarea{display:block;width:100%;padding:12px;margin-top:6px;font:16px/1.7 system-ui;border:1px solid #d9dce2;border-radius:10px;background:#fafbfc;color:#252832;caret-color:#252832}input::placeholder,textarea::placeholder{color:#666b77;opacity:1}textarea{min-height:132px;resize:vertical}
 .actions{display:flex;gap:12px;margin-top:20px}.actions button{flex:1;border:1px solid #ddd;border-radius:12px;min-height:48px;padding:10px;font:600 16px system-ui;cursor:pointer}#confirm{background:var(--accent);color:white;border:0}#parse-status{font-size:14px;color:#356b45}#parse-address{margin-top:8px;padding:10px 16px;border:1px solid #d9dce2;border-radius:10px;background:white;font:600 14px system-ui;cursor:pointer}#error{color:#bc241a;min-height:24px}#hint{color:#666b77;margin:0;font-size:14px}
 html[data-platform="laptop"]{--preview-width:380px}html[data-platform="tablet"]{--preview-width:480px}html[data-platform="mobile"]{--preview-width:100%}
 @media(max-width:599px){#workspace{padding:10px 10px 0}#page{border-radius:14px}dialog{padding:20px}#tools{padding-top:12px}}

@@ -13,7 +13,7 @@ from clipboard_checks import check_clipboard
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / 'pages-site'
 OUT = ROOT / 'pages-check'
-OUT.mkdir()
+OUT.mkdir(exist_ok=True)
 server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(SimpleHTTPRequestHandler, directory=str(SITE)))
 thread = threading.Thread(target=server.serve_forever, daemon=True)
 thread.start()
@@ -46,7 +46,7 @@ try:
         assert page.locator('#paste-input').input_value() == text
         assert page.locator('#merchant-input').input_value() == '新商家'
         assert page.locator('#phone-input').input_value() == '13800138000'
-        assert ''.join(page.locator('#address-input').input_value().split('\n')) == '上海市上海市浦东新区新地址100号'
+        assert ''.join(page.locator('#address-input').input_value().split('\n')) == '上海市浦东新区新地址100号'
         with page.expect_download() as pending:
             page.locator('#confirm').click()
         pending.value.save_as(OUT / 'edited.png')

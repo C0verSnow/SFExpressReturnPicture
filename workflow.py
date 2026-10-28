@@ -34,7 +34,7 @@ def main():
             export_page(args.config, ROOT / 'offline-return-page')
             split_screenshot(args.image, ROOT / 'output')
             export_address(ROOT / 'tests/original-address.json', ROOT / 'offline-address')
-            for script in ('browser_pages.py', 'browser_full_page.py', 'browser_address.py'):
+            for script in ('browser_issue9.py', 'browser_pages.py', 'browser_full_page.py', 'browser_address.py'):
                 run_check(script)
         else:
             target = args.output_dir or ROOT / defaults[args.action]
