@@ -6,6 +6,15 @@ on:
 permissions:
   contents: read
 jobs:
+  address:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Address normalization and lossless three-line regressions
+        run: node tests/address_core.cjs
   test:
     runs-on: ubuntu-latest
     strategy:

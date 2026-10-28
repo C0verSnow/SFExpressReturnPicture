@@ -1,6 +1,7 @@
 # 本文档为4象限的任务清单，全文书写大白话
 
 ## 想做：
+- [1793166771] 完成 issue #11：源码归入 src/、修正省市区层级去重、跑远端 CI、同步发布文件、提交 PR 等人工 Review；未经批准不合并、不关闭 issue。
 - [1793122188] 完成 C0verSnow issue #9：修复深色显示、地址重复和长地址括号裁剪，更新文档及远端测试，取回发布文件，提交 PR 等待用户审阅并关闭 issue。
 - [1793119277] 完成 C0verSnow issue #7：一键读取剪贴板并解析、失败时手动粘贴，更新示例、文档、远端测试和发布文件，提交 PR 并关闭 issue。
 - [1793101901] 完成当前 C0verSnow issue #5：粘贴收件信息自动解析、省市区补全、三行排版和原地址闪现修复；提交 PR，跑远端测试并关闭 issue。
@@ -14,6 +15,10 @@
 - 更新使用说明，补上验证流程，提交 PR，并在完成后关闭 issue。
 
 ## 做完：
+- [1793168036] issue #11 实现、文档、发布快照均完成；c9b0787 的 push/PR 两套远端 CI 全绿，含 34 组地址、两版 Python、全部浏览器及 pages 逐文件一致性：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642366025 和 https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642371842 。PR #12 等人工 Review，保持 issue open；未合并、未部署。GitHub 检索与比较已记录，本地未编译/构建/生成或运行项目测试。
+- [1793167836] 4d70026 的远端功能检查全部通过：34 组地址、Python 3.10/3.13、严格跨设备 PNG、HTTP/离线/剪贴板/主题/旧地址页；仅旧 pages 快照一致性失败。已从该轮附件取回九个发布文件，核对 ZIP SHA-256 和源 JS；本地没有生成网页。运行：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40642027019 。
+- [1793167745] 已取回并静态对比 7c1fddf 的远端照片：均为 1182×2560，差异 2467 像素仅在电话数字矩形 (575,1728)-(860,1765)，姓名、地址及其他底图像素完全相同；已查看解析弹窗，布局正常。4d70026 已将跨设备比较的操作历史和浏览器进程对齐，未放宽任何像素标准，等远端结果。
+- [1793167010] 已先推送 578a488 红回归；远端 node tests/address_core.cjs 共 19 组、8 组失败，Howard 实际少一份北京市，浏览器 verify 也复现；Python 3.10/3.13 原测试通过。运行：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40640724727 。GitHub 已检索到 smartParsePro 和 data_location 的相关设计，比较记录到 docs/issue-11-research.md。
 - [1793123157] issue #9 已完成交付：PR #10 已从草稿改为可审阅，保持 open、未合并，等用户 review；按 issue 正文要求已关闭 #9，并确认状态为 closed。最终功能和发布提交 550a70f 的 push/PR 远端检查全部通过：https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40553315051 和 https://github.com/C0verSnow/SFExpressReturnPicture/actions/runs/40553327089 。
 - [1793123157] 已更新模板、测试、README、GitHub 候选项目比较及远端生成的 pages/。GitHub 查到了 smartParsePro（ISC）与 data_location（MIT）的相关设计，已记录链接，没有复制解析器代码或新增依赖。本地未构建、编译、生成或运行项目测试，只做静态检查和查看远端附件。
 - [1793123011] 已从远端附件取回全部九个 pages/ 文件，核对 ZIP SHA-256 和文件清单，发布 JS 与模板完全相同；本地没有生成网页。实际变更是 index.html 与 full-page.js，准备推送最终发布一致性检查。
@@ -110,6 +115,7 @@
 - [1793101901] 已在 GitHub 检索地址解析项目；正在比较维护情况、许可证和行政区划设计；本地不运行构建、生成验证或测试。
 
 ## 没做：
+- [1793167885] issue #11 不做本地编译/构建/生成/项目测试；没有部署到 Cloudflare，没有实体手机权限验证；PR #12 待人工 Review，不自动合并、不自动关闭 issue。
 - [1793123157] PR #10 未合并；没有操作 Cloudflare 生产部署。实体安卓截图的大面积黑底未在桌面 Chromium 模拟中复现，已采用官方 only light 方式修复自动深色兼容，实体手机和厂商强制深色仍需复核，未宣称实体机验证通过。
 - [1793120718] 本次没有实体 iPhone Safari、安卓系统授权测试，没有操作 Cloudflare 后台；浏览器授权限制与手动粘贴方式已在 README 说明。
 - [1793102973] 当前 PR #6 尚未合并；本次没有操作 Cloudflare 生产部署。
@@ -118,6 +124,14 @@
 - 不做本地编译验证，也不运行会触发编译的测试或构建；需要验证时走远端 CI。
 
 ## 在做：
+- [1793168036] issue #11 无剩余实现事项；补充最终验收记录后交付 PR #12 等用户 Review，后续反馈继续在当前 feature 分支处理。
+- [1793167885] 源码、文档和远端生成的 pages 发布快照已齐，PR #12 的功能检查已通过；现在提交九文件快照和验证记录，等最终逐文件一致性 CI。实现完成后交给用户 Review，issue #11 保持 open、未合并、未部署。
+- [1793167687] 59b0739 远端 34 组地址、Python 3.10/3.13 均通过；浏览器跨设备照片比较两次失败在不同行为历史的参考图。准备在各设备独立 Chromium 下重放相同操作，保持 PNG 字节完全一致，并额外逐平台检查字段、尺寸及下载与预览 RGBA 全像素；原逐字段和恢复检查全部保留，远端图片仍在取回分析。
+- [1793167268] 已创建草稿 PR #12 等远端验证：https://github.com/C0verSnow/SFExpressReturnPicture/pull/12 。静态复核发现镇名学校和重复省名后的区名学校会被误删，已补回归并改为独立字段边界/完整重复路径证据，连写歧义前缀保留；纯逻辑现 34 组。
+- [1793167158] 已完成纯地址模块提取和三级输出修复，补 29 组纯逻辑及浏览器安全回归；只清明确重复路径，孤立同名区县词保留，县简称连写不可靠时提示手填。Python 静态语法及差异检查通过；本机没有 Node，未进行 JS 运行验证，准备交远端 CI。
+- [1793167075] Python 业务、模板和地区数据已迁到 src/sf_return，五个根入口保留；静态核对确认原地区数据/许可及未改模板逐字节一致，字体、截图、配置没动。正在修复直辖市层级输出与保守前缀处理，远端生成 pages 后再提交发布快照。
+- [1793166877] 已记录目录、兼容入口、读写路径、CLI、测试和九个 Pages 文件基线到 docs/issue-11-plan.md；正在先补完整地址与歧义回归，并并行核对 GitHub 参考设计。
+- [1793166771] 已读取 issue 正文及两条评论，git fetch 后从最新 origin/main（0db6de6）创建 feature/issue-11-engineering-address；原工作区干净，旧分支独有提交保留。本地不编译、不生成、不跑项目测试。
 - [1793123157] issue #9 没有剩余实现事项，PR #10 等用户审阅；本次最后只补完成记录，功能和发布文件与已通过远端检查的 550a70f 一致。
 - [1793122188] 已读取 issue #9 正文和全部评论，同步 origin/main 并创建 feature/issue-9-address-dark-mode。正在读取截图和解析逻辑，重新核实 GitHub 候选项目；本地不运行生成、构建或项目测试。
 - [1793120718] 当前 C0verSnow issue #7 的实现、文档、发布文件、远端验证、PR 合并和 issue 关闭均已完成，没有剩余事项。
